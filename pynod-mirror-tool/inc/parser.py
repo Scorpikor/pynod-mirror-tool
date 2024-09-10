@@ -24,7 +24,8 @@ def parser_update_ver(updatever_file_path):
         try:
             file = config.get(sect,'file')
             if "/" not in file:
-                #print("В конфиге только файл без пути") # Пока не понятно когда формируются такие файлы
+                #print("В конфиге только файл без пути") 
+                # Пока не понятно когда формируются такие файлы. Вероятно, их формируют антивирусы, которые умеют создавать зеркало.
                 file = "dll/" + file
                 files_to_download.append(file)
             else:

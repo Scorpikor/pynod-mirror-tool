@@ -1,10 +1,16 @@
+# Этот файл является частью проекта PyNOD-Mirror-Tool
+# актуальную версию которого можно скачть по адресу:
+# https://github.com/Scorpikor/pynod-mirror-tool
+
 import os
 import configparser
 import inspect
 import sys
+from inc.log import *
 
 def parser_config_versions_to_update(config_file):
     # Парсим конфиг и возвращаем список версий антивируса, которые будем пытаться обновлять
+    log("parser.py:parser_config_versions_to_update",5)
     config = configparser.ConfigParser()
     config.read(config_file)
     versions = []
@@ -17,28 +23,25 @@ def parser_config_versions_to_update(config_file):
     
 def parser_update_ver(updatever_file_path):
     # Парсим update.ver и возвращаем список файлов для скачивания
+    log("parser.py:parser_update_ver",5)
     files_to_download = []
     config = configparser.ConfigParser()
     config.read(updatever_file_path)
     for sect in config.sections():
         try:
             file = config.get(sect,'file')
-            if "/" not in file:
-                #print("В конфиге только файл без пути") 
-                # Пока не понятно когда формируются такие файлы. Вероятно, их формируют антивирусы, которые умеют создавать зеркало.
-                file = "dll/" + file
-                files_to_download.append(file)
-            else:
-                files_to_download.append(file)
+            size = int(config.get(sect,'size'))
+            files_to_download.append([file,size])
+            
         except Exception as e:
-            print("В секции отсутствует file")
-            #print(e)
+            log("parser.py:parser_update_ver: В секции отсутствует file",5)
         
-    print("Надо скачать файлов:", len(files_to_download))
+    log("parser.py:parser_update_ver: Необходимо скачать файлов: " + str(len(files_to_download)),5)
     return files_to_download     
     
 def get_DB_version(updatever_file):
     # узнаем версию баз в update.ver
+    log("parser.py:get_DB_version",5)
     max = 0
     if os.path.exists(updatever_file):
     
@@ -47,7 +50,6 @@ def get_DB_version(updatever_file):
             config.read(updatever_file)
             sections = config.sections()
         except Exception as e:
-            #print(e)
             return 0
             
         for section in sections:
@@ -56,7 +58,7 @@ def get_DB_version(updatever_file):
                 if upd and float(upd) > max:
                     max = float(upd)
             except:
-                print("Пропуск")
+                log("parser.py:get_DB_version: Пропуск секции т.к. не содержит строку version",5)
         
     return max
     

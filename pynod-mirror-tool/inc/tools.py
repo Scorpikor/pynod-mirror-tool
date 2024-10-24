@@ -53,7 +53,7 @@ def tools_download_file(session,download_dict):
     if os.path.exists(path_to_save):
         local_file_size = os.path.getsize(path_to_save)  # Размер локального файла
         if local_file_size == total_size:
-            log(str(download_dict['text']) + " Файл уже существует и его размер совпадает " + str(local_file_size) + " байт. Скачивание не требуется.", 3)
+            log(str(path_to_save) + " Файл уже существует и его размер совпадает " + str(local_file_size) + " байт. Скачивание не требуется.", 3)
             return 0 #local_file_size
             
     # Если файл не существует или его размер отличается, выполняем загрузку

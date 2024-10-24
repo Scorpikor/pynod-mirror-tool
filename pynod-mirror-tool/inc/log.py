@@ -9,7 +9,7 @@ from inc.class_tools import *
 
 def log ( text, log_level):
     
-    log_informativeness = 3 # может принимать значения от 1 до 4. 1 - минимум информации, 4 - для отладки
+    log_informativeness = 2 # может принимать значения от 1 до 4. 1 - минимум информации, 4 - для отладки
    
     if log_level == 1:          # info
         if log_informativeness >= 1:

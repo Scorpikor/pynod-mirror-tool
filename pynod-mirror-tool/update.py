@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 files_to_delete = unique_elements([file_path[0] for file_path in new_files_list], all_files_in_DB_folder)
                 
                 delete_files(files_to_delete)                
-                log("Кол-во файлов старых файлов удалено: " + str(len(files_to_delete)),2)
+                log("Кол-во старых файлов удалено: " + str(len(files_to_delete)),2)
                 remove_empty_folders(DB_folder)
                 log("Кол-во файлов в папке с базами " + str(version)+ ": " + str(len(all_files_in_DB_folder)),2)
                 log("Размер папки c базами " + str(version)+ ": " + str(sizeof_fmt(folder_size(DB_folder))),2)           

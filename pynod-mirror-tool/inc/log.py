@@ -3,15 +3,13 @@
 # https://github.com/Scorpikor/pynod-mirror-tool
 
 import configparser
-import logging
 import time
 import os
 from inc.class_tools import *
 
 def log ( text, log_level):
-    #current_directory = os.path.dirname(os.path.abspath(__file__))
-    #config = configparser.ConfigParser()
-    log_informativeness = 3
+    
+    log_informativeness = 3 # может принимать значения от 1 до 4. 1 - минимум информации, 4 - для отладки
    
     if log_level == 1:          # info
         if log_informativeness >= 1:

@@ -96,8 +96,10 @@ if __name__ == "__main__":
                     'server_password': config.get('CONNECTION','mirror_password'),
                     'server_timeout': int(config.get('CONNECTION','mirror_timeout'))       
                     }
-                    downloaded_size_version += int(tools_download_file(session,download_dict))
-                    downloaded_files_version += 1
+                    download_result = int(tools_download_file(session,download_dict))
+                    if download_result != 0:
+                        downloaded_size_version += download_result
+                        downloaded_files_version += 1
                     
                 modify_update_ver(current_directory + '/tmp/update.ver',prefix_config + '/' + version + add_path)
                 move_file(current_directory + '/tmp/update.ver', web_server_root + '/' + init_environment['dll'])

@@ -126,10 +126,18 @@ if __name__ == "__main__":
             print("")
     # ---
     
-    log(TColor.CYAN +"-"*60 + TColor.ENDC,2)
+    log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
     log("Всего скачано файлов        : " + str(downloaded_files_all),2)
     log("Размер всех скачанных файлов: " + str(sizeof_fmt(downloaded_size_all)),2)
     log("Полный размер всех баз " + str(web_server_root) + str(config.get('ESET','prefix')) + ": " + str(sizeof_fmt(folder_size(web_server_root + config.get('ESET','prefix')))),2)
+    for version in versions_to_update:
+        DB_folder = web_server_root + prefix_config + '/' + version
+        all_files_in_DB_folder = list_files_and_folders(DB_folder)
+        message = f"[{str(version):<5}]" \
+        f" Файлов в папке с базами: {str(len(all_files_in_DB_folder)):<6}" \
+        f" Размер папки:  {str(sizeof_fmt(folder_size(DB_folder))):<8}"
+        log(message,2)      
+    
     end_time = time.time()
     log("Время выполнения скрипта: " + str(convert_seconds(end_time - start_time)),2)
-    log(TColor.CYAN +"-"*60 + TColor.ENDC,2)
+    log(TColor.CYAN +"-"*70 + TColor.ENDC,2)

@@ -29,7 +29,7 @@ server {
                 if ($ver ~ "^ep[6-9]$") {
                         rewrite ^/(dll/)?update.ver$ /eset_upd/$ver/$1update.ver break;
                 }
-				if ($ver ~ "^ep11$") {
+		if ($ver ~ "^ep11$") {
                         rewrite ^/(dll/)?update.ver$ /eset_upd/$ver/$1update.ver break;
                 }
 

@@ -39,6 +39,10 @@ def tools_download_file(session,download_dict):
             log(str(response.headers),5)
             total_size = int(response.headers.get('content-length', 0))
             log("tools.py:tools_download_file: Размер файла берем с сервера: " + str(total_size),5)
+            if response.status_code == 401:                
+                log("tools.py:tools_download_file: " + str(url) + " Сервер требует авторизацию! Необходимо проверить правильность указанных данных авторизации в файле конфигурации!",4)
+                log("tools.py:tools_download_file: Завершение работы скрипта!",4)
+                sys.exit(1)
             if response.status_code == 404:                
                 log("tools.py:tools_download_file: " + str(url) + " Файл на сервере не найден! Необходимо проверить правильность URL для скачивания!",4)
                 log("tools.py:tools_download_file: Завершение работы скрипта!",4)

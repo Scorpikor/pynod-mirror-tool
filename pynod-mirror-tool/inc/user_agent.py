@@ -16,6 +16,20 @@ def user_agent (ver):
         )
         return random.choice(bzz)
 
+    if ver == 'ep9':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 9.1.2060.0; OS: 10.0.26100 SP 0.0 NT; HWF: 01001E59-7926-48F0-8556-5209DC5E3C06; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3AC-9SP-9D9; SEAT 154b3474; RET 2103)',
+        'EEA Update (Windows; U; 64bit; BPC 9.1.2060.0; OS: 10.0.26100 SP 0.0 NT; HWF: 01001E58-7916-38F1-8218-2208DC5E3C12; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 2AC-2SP-9D9; SEAT 144b2454; RET 2103)',
+        )
+        return random.choice(bzz)
+        
+    if ver == 'ep10':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 10.1.2050.0; OS: 10.0.26100 SP 0.0 NT; HWF: 01001E59-7926-48F0-8532-3209DC5E3C06; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3AC-9SP-9D9; SEAT 142a2374; RET 2103)',
+        'EEA Update (Windows; U; 64bit; BPC 10.1.2050.0; OS: 10.0.26100 SP 0.0 NT; HWF: 01001B48-6812-17C0-7423-4209DC5E3C06; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3BA-8SP-8D9; SEAT 125b3772; RET 2103)',
+        )
+        return random.choice(bzz)
+
     if ver == 'ep11':
         bzz =(
         'EEA Update (Windows; U; 64bit; BPC 11.1.2039.2; OS: 10.0.19044 SP 0.0 NT; TDB 62700; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 2486; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; HWF: 0100B9A0-42B1-1750-55DF-CAEB09DF8A91; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 33D-58A-6KA; SEAT 154b3474; RET 5003)',
@@ -23,6 +37,7 @@ def user_agent (ver):
         'EEA Update (Windows; U; 64bit; BPC 11.1.2039.2; OS: 10.0.19045 SP 0.0 NT; TDB 62700; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 4780; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 0; HWF: 01005E32-3BC2-517A-3422-4FC7D96C228D; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 33D-58A-6KA; SEAT 154b3474; RET 5003)',
         'EEA Update (Windows; U; 64bit; BPC 11.1.2039.2; OS: 10.0.19044 SP 0.0 NT; TDB 62700; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 4780; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; HWF: 01006EA5-7B2D-F1B5-4AF4-0BE6460EBA88; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 33D-58A-6KA; SEAT 154b3474; RET 5003)',
         'EEA Update (Windows; U; 64bit; BPC 11.1.2039.2; OS: 10.0.14393 SP 0.0 NT; TDB 62700; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 7259; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; HWF: 01009A9A-0E80-5B64-D3F6-777607621C5C; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 33D-58A-6KA; SEAT 154b3474; RET 5003)',
+        'EEA Update (Windows; U; 64bit; BPC 11.1.2052.0; OS: 10.0.26100 SP 0.0 NT; TDB 63278; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 1882; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; HWF: 01001E59-7926-48F0-8538-5209DC5E3C06; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3AC-9SP-9D9; SEAT 154b3474; RET 5003)',
         )
         return random.choice(bzz)
 

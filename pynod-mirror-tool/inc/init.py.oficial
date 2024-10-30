@@ -50,7 +50,7 @@ def init(ver):
     if ver == 'v18':
         return {
         'fix': '/dll',
-        'upd' : 'eset_upd/consumer/windows/full/dll/update.ver',
+        'upd' : 'auto/consumer/windows/dll/update.ver',
         'dll' : 'eset_upd/v18/dll/update.ver',
         'name' : 'ESET NOD32 Ver. 17 - 18'
         }

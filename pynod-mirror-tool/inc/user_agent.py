@@ -4,8 +4,8 @@ import sys
 def user_agent (ver):
     if ver == 'v3':
         bzz =(
-        'ESS Update (Windows; U; 32bit; VDB 62496; BPC 4.5.12011.3; OS: 6.2.9200 SP 0.0 NT; TDB 62496; LUO 0.101; CH 0.0; LNG 1049; x64s; APP efsw; FW 0.0; PX 0; PUA 1; RA 0; UBR 7159; HVCI 0; SHA256 1; WU 3; ACS 1)',
-        'ESS Update (Windows; U; 32bit; VDB 62496; BPC 4.5.12011.3; OS: 6.2.9200 SP 0.0 NT; TDB 62496; LUO 0.101; CH 0.0; LNG 1049; x64s; APP efsw; FW 0.0; PX 0; PUA 1; RA 0; UBR 7159; HVCI 0; SHA256 1; WU 3; ACS 1)'
+        'ESS Update (Windows; U; 32bit; VDB 62496; BPC 4.5.12011.3; OS: 6.2.9200 SP 0.0 NT; TDB 62496; LUO 0.101; CH 0.0; LNG 1049;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; BPC 4.5.12011.3; OS: 6.2.9200 SP 0.0 NT; TDB 62496; LUO 0.101; CH 0.0; LNG 1049;',
         )
         return random.choice(bzz)
 

@@ -15,6 +15,55 @@ def user_agent (ver):
         'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; BPC 5.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01002CD8-8936-1A8B-4561-88643B38A24B)'
         )
         return random.choice(bzz)
+        
+    if ver == 'v14':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 14.0.12011.3; OS: 6.2.9200 SP 0.0 NT;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 14.0.12011.3; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
+        
+    if ver == 'v15':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 15.0.12011.3; OS: 6.2.9200 SP 0.0 NT;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 15.0.12011.3; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
+ 
+    if ver == 'v16':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 16.0.12011.3; OS: 10.0.26100 SP 0.0 NT;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 16.0.12011.3; OS: 10.0.26100 SP 0.0 NT;'
+        )
+        return random.choice(bzz)    
+ 
+    if ver == 'v18':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 18.0.11.0; OS: 10.0.19045 SP 0.0 NT;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 18.0.11.0; OS: 10.0.19045 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
+    
+    if ver == 'ep6':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 6.0.2060.0; OS: 10.0.26100 SP 0.0 NT;',
+        'EEA Update (Windows; U; 64bit; BPC 6.0.2062.0; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz) 
+    
+    if ver == 'ep7':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 7.0.2060.0; OS: 6.2.9200 SP 0.0 NT;',
+        'EEA Update (Windows; U; 64bit; BPC 7.0.2062.0; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
+    
+    if ver == 'ep8':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 8.0.2060.0; OS: 6.2.9200 SP 0.0 NT;',
+        'EEA Update (Windows; U; 64bit; BPC 8.0.2062.0; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
 
     if ver == 'ep9':
         bzz =(

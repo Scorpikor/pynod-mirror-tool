@@ -27,6 +27,6 @@ def log ( text, log_level):
         text_line = TColor.RED + "[" + str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())) + "] " + TColor.ENDC + str(text)
         print(text_line)
     if log_level == 5:          # debug
-        if log_informativeness == 4:
+        if log_informativeness >= 5:
             text_line = TColor.YELLO + "[" + str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())) + "] " + TColor.ENDC + str(text)
             print(text_line)

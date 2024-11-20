@@ -9,28 +9,50 @@ from requests.adapters import HTTPAdapter, Retry
 import configparser
 import os
 import inspect
-from inc.init import *
+#from inc.init import *
 from inc.tools import *
 from inc.parser import *
 from inc.log import *
 from inc.user_agent import *
 from inc.class_tools import *
+from inc.web import *
+#======================
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from ping3 import ping,verbose_ping
+
+
 
 if __name__ == "__main__":
     print("")
+    web_page_data = []
+    web_page_table = ""                                                         # для формирования html web таблицы
     downloaded_size_all = 0                                                     # Счетчик сетевого трафика
     downloaded_files_all = 0                                                    # Счетчик скачанных файлов
-    current_directory = os.path.dirname(os.path.abspath(__file__))              # Путь, из которого запускается update.py
-    
+    current_directory = os.path.dirname(os.path.abspath(__file__))              # Путь, из которого запускается update.py    
     start_time = time.time()
     config = configparser.ConfigParser()
     config.read(current_directory + '/nod32ms.conf')    
     versions_to_update = parser_config_versions_to_update(current_directory + '/nod32ms.conf')  # список версий баз антивируса для обновления
-    log("Текущая папка " + str(current_directory),5)
+    official_servers_update = int(config.get('CONNECTION','official_servers_update'))
     
+    if official_servers_update == 1:
+        from inc.init_official import *
+        log("Режим обновления с официальных серверов",1)
+        oficial_servers = [value for key, value in config.items('OFFICIAL_SERVERS') if key.startswith('mirror')]
+        mirror, avg_time = choosing_the_best_server(oficial_servers)
+        log("Выбран лучший официальный сервер для обновлений: " + str(mirror)+ " " + str(avg_time) +" ms",2)
+        mirror_server ="http://" + str(mirror)
+        
+    else:
+        from inc.init import *
+        log("Режим обновления с неофициальных зеркал",1)
+        mirror_server = config.get('CONNECTION','mirror')                       # Сервер обновлений баз из конфига
+        
+    log("Текущая папка " + str(current_directory),5)
+
     for version in versions_to_update:
-        downloaded_size_version = 0
-        downloaded_files_version = 0
+        downloaded_size_version = 0                                             # Счетчик сетевого трафика для текущей версии
+        downloaded_files_version = 0                                            # Счетчик скачанных файлов для текущей версии
         with requests.Session() as session:                                     # Создаём сессию
             retries = Retry(total=config.get('CONNECTION','mirror_connect_retries'),
                 backoff_factor=0.4,
@@ -39,7 +61,7 @@ if __name__ == "__main__":
             
             init_environment = init(version)                                    # Берем переменные для данной версии антивируса     
             log("[" + str(version)+ "]" + " Обновляем вериию: " + str(init_environment['name']),1 )
-            mirror_server = config.get('CONNECTION','mirror')                   # Сервер обновлений баз 
+             
             web_server_root = config.get('SCRIPT','web_dir')                    # Путь к корню веб сервера, где будем хранить базы
             prefix_config = config.get('ESET','prefix')                         # Имя папки, в которую складывать базы разных версий в корне веб сервера
             add_path =''        # добавочный путь
@@ -124,12 +146,22 @@ if __name__ == "__main__":
             downloaded_size_all += downloaded_size_version                                                      # Счетчик сетевого трафика
             downloaded_files_all += downloaded_files_version
             print("")
+            upd_ver_creation_datetime = file_creation_datetime(web_server_root + '/' + init_environment['dll'])
+            web_page_data.append([
+                                str(version),str(alien_DB_version),
+                                str(upd_ver_creation_datetime),
+                                str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())),
+                                str(sizeof_fmt(folder_size(web_server_root + prefix_config + '/' + version + add_path)))
+                                ])
     # ---
     
     log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
     log("Всего скачано файлов        : " + str(downloaded_files_all),2)
     log("Размер всех скачанных файлов: " + str(sizeof_fmt(downloaded_size_all)),2)
-    log("Полный размер всех баз " + str(web_server_root) + str(config.get('ESET','prefix')) + ": " + str(sizeof_fmt(folder_size(web_server_root + config.get('ESET','prefix')))),2)
+    full_base_size = str(sizeof_fmt(folder_size(web_server_root + config.get('ESET','prefix'))))
+    log("Полный размер всех баз " + str(web_server_root) + str(config.get('ESET','prefix')) + ": " + full_base_size,2)
+    web_page_data.append (["","","","Полный размер бызы",full_base_size])
+    
     for version in versions_to_update:
         DB_folder = web_server_root + prefix_config + '/' + version
         all_files_in_DB_folder = list_files_and_folders(DB_folder)
@@ -138,6 +170,11 @@ if __name__ == "__main__":
         f" Размер папки:  {str(sizeof_fmt(folder_size(DB_folder))):<8}"
         log(message,2)      
     
-    end_time = time.time()
-    log("Время выполнения скрипта: " + str(convert_seconds(end_time - start_time)),2)
+    end_time = str(convert_seconds(time.time() - start_time))
+    log("Время выполнения скрипта: " + end_time ,2)
     log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
+    
+    web_page_data.append (["","","","Время работы скрипта",end_time])
+    if config.get('LOG','generate_web_page') == "1":
+        web_page_generator(web_page_data,config.get('LOG','generate_table_only'),config.get('LOG','html_table_path_file'))
+    

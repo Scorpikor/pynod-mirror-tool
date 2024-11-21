@@ -1,3 +1,7 @@
+# Этот файл является частью проекта PyNOD-Mirror-Tool
+# актуальную версию которого можно скачть по адресу:
+# https://github.com/Scorpikor/pynod-mirror-tool
+
 import random
 import sys
 

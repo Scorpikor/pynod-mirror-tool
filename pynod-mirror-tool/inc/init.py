@@ -95,6 +95,14 @@ def init(ver):
         'name' : 'ESET NOD32 Endpoint Ver. 11'          # Описание
         }
 
+    if ver == 'ep12':
+        return {
+        'fix': '/dll',                                  # Добавочный путь
+        'upd' : 'dll/update.ver',                       # Путь, по которому сам ep12 запрашивает update.ver с сервера обновлений
+        'dll' : 'eset_upd/ep12/dll/update.ver',         # Путь, по которому будет лежать update.ver у нас на зеркале
+        'name' : 'ESET NOD32 Endpoint Ver. 12'          # Описание
+        }
+
     else:
         log("Неопределенная версия " + str(ver) + " в init.py",4)
         sys.exit(1)

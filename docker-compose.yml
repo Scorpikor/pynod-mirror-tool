@@ -1,0 +1,27 @@
+services:
+  pynod-worker:
+    build:
+      context: ./
+      dockerfile: wrk.Dockerfile
+    container_name: wrk
+    restart: unless-stopped
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./crontab:/etc/cron.d/crontab
+      - ./pynod-mirror-tool/nod32ms.conf:/app/pynod/nod32ms.conf
+      - ./pynod-mirror-db:/var/www/nod32mirror
+
+  pynod-nginx:
+    build:
+      context: ./
+      dockerfile: ngx.Dockerfile
+    container_name: ngx
+    ports:
+      - 8888:80
+    restart: unless-stopped
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./pynod-mirror-db:/var/www/nod32mirror
+      - ./nginx:/etc/nginx/conf.d/default.conf

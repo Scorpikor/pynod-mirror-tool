@@ -15,8 +15,43 @@ def user_agent (ver):
 
     if ver == 'v5':
         bzz =(
-        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; BPC 5.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01003AD8-8936-1E9B-4561-88243B38324B)',
-        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; BPC 5.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01002CD8-8936-1A8B-4561-88643B38A24B)'
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 5.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01003AD8-8936-1E9B-4561-88243B38324B)',
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 5.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01002CD8-8936-1A8B-4561-88643B38A24B)'
+        )
+        return random.choice(bzz)
+        
+    if ver == 'v9':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 9.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01003AD8-8936-1E9B-4561-88243B38324B)',
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 9.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01002CD8-8936-1A8B-4561-88643B38A24B)'
+        )
+        return random.choice(bzz)
+
+    if ver == 'v10':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 10.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01003AD8-8936-1E9B-4561-88243B38324B)',
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 10.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01002CD8-8936-1A8B-4561-88643B38A24B)'
+        )
+        return random.choice(bzz)
+        
+    if ver == 'v11':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 11.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01003AD8-8936-1E9B-4561-88243B38324B)',
+        'ESS Update (Windows; U; 32bit; PVT F; VDB 15881; EAV 11.0.2225.1; OS: 6.2.9200 SP 0.0 NT; TDB 15881; CL 0.0.0; LNG 1049; x64c; APP eea; BEO 1; ASP 0.10; FW 0.0; PX 0; PUA 1; CD 0; RA 0; HWF: 01002CD8-8936-1A8B-4561-88643B38A24B)'
+        )
+        return random.choice(bzz)
+
+    if ver == 'v12':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 12.0.12011.3; OS: 6.2.9200 SP 0.0 NT;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 12.0.12011.3; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
+
+    if ver == 'v13':
+        bzz =(
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 13.0.12011.3; OS: 6.2.9200 SP 0.0 NT;',
+        'ESS Update (Windows; U; 32bit; VDB 62496; EAV 13.0.12011.3; OS: 6.2.9200 SP 0.0 NT;'
         )
         return random.choice(bzz)
         
@@ -93,8 +128,15 @@ def user_agent (ver):
         'EEA Update (Windows; U; 64bit; BPC 11.1.2052.0; OS: 10.0.26100 SP 0.0 NT; TDB 63278; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 1882; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; HWF: 01001E59-7926-48F0-8538-5209DC5E3C06; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3AC-9SP-9D9; SEAT 154b3474; RET 5003)',
         )
         return random.choice(bzz)
-
- 
+        
+    if ver == 'ep12':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 12.0.2038.0; OS: 10.0.19044 SP 0.0 NT; TDB 63712; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 5131; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; NPU 0; HWF: 01002113-CA24-DFF1-C386-8730C979CAFA; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 32D-58A-5KA; SEAT 143b3474; RET 2103)',
+        'EEA Update (Windows; U; 64bit; BPC 12.0.2038.0; OS: 10.0.19044 SP 0.0 NT; TDB 63712; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 5131; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; NPU 0; HWF: 01016223-CC15-AFF1-C285-6720C974CAFE; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 21D-46A-AKA; SEAT 124b3434; RET 2103)',
+        'EEA Update (Windows; U; 64bit; BPC 12.0.2038.0; OS: 10.0.19044 SP 0.0 NT; TDB 63744; CL 0.0.0; x64c; APP eea; PX 0; PUA 1; CD 0; RA 0; UNS 1; UBR 5131; HVCI 0; SHA256 1; WU 3; ACS 1; TDT 0; LTS 1; NPU 0; HWF: 01A0E029-1562-2C2A-AB16-52A2CA6BCD20; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3CD-57A-6KA; SEAT 144a2474; RET 5003)'
+            )
+        return random.choice(bzz)
+    
     else:
         print ("Неопределенная версия", ver, "в user_agent.py")
         sys.exit(1)

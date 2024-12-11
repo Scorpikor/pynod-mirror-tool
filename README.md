@@ -1,5 +1,8 @@
-# pynod-mirror-tool
+# pynod-mirror-tool - Dockerized
+
 python mirror tool  to create local mirror nod32 antivirus bases
+
+Быстрый запуск: docker compose up -d
 
 ВНИМАНИЕ! Скрипт ключи не ищет. Его задача подключиться к серверу зеркала баз NOD32, скачать базы и разложить
 по папкам, чтоб другие антивирусы смогли обновиться.

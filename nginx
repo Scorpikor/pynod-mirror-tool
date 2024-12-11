@@ -6,14 +6,14 @@ map $http_user_agent $ver {
 
 server {
 
-        listen   xxx.xxx.xxx.xxx:22227;
-        #listen [::]:80;
+        listen [::]:80;
+        listen      80;
 
         root /var/www/nod32mirror;
 
         # Add index.php to the list if you are using PHP
 
-        server_name nod32.domain.ru update.domain.ru;
+        server_name _;
 
         index index.html;
         
@@ -22,7 +22,7 @@ server {
 	add_header X-Robots-Tag "noindex, nofollow, nosnippet, noarchive";
 	add_header Cache-Control "no-cache, public, must-revalidate";
 	real_ip_header X-Real-IP;
-    real_ip_recursive on;
+	real_ip_recursive on;
 
 
 	location ~* \.ver$ {
@@ -51,6 +51,6 @@ server {
 
         access_log /var/log/nginx/error_nod32mirror.log;
         #error_log /var/log/nginx/error_nod32mirror.log debug;
-		error_log /var/log/nginx/error_nod32mirror.log;
+	error_log /var/log/nginx/error_nod32mirror.log;
 
 }

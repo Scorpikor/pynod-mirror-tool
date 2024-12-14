@@ -58,7 +58,7 @@ def init(ver):
     if ver == 'ep6':
         return {
         'fix': '/dll',                                  # Добавочный путь
-        'upd' : 'eset_upd/ep6.6/update.ver',        # Путь, по которому сам ep6 запрашивает update.ver с сервера обновлений
+        'upd' : 'eset_upd/ep6.6/update.ver',            # Путь, по которому сам ep6 запрашивает update.ver с сервера обновлений
         'dll' : 'eset_upd/ep6/dll/update.ver',          # Путь, по которому будет лежать update.ver у нас на зеркале
         'name' : 'ESET NOD32 Endpoint Ver. 6'           # Описание
         }   
@@ -84,7 +84,7 @@ def init(ver):
         'fix': '/dll',                                  # Добавочный путь
         'upd' : 'dll/update.ver',                       # Путь, по которому сам ep10 запрашивает update.ver с сервера обновлений
         'dll' : 'eset_upd/ep10/dll/update.ver',         # Путь, по которому будет лежать update.ver у нас на зеркале
-        'name' : 'ESET NOD32 Endpoint Ver. 9'           # Описание
+        'name' : 'ESET NOD32 Endpoint Ver. 10'          # Описание
         }   
     
     if ver == 'ep11':

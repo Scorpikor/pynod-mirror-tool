@@ -85,7 +85,10 @@ if __name__ == "__main__":
         update_date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         
         # Дата изменения update.ver
-        upd_ver_creation_datetime = file_creation_datetime(f"{web_server_root}{os_separator}{init_filepath_fix(os_separator,init(version)['dll'])}") 
+        try:
+            upd_ver_creation_datetime = file_creation_datetime(f"{web_server_root}{os_separator}{init_filepath_fix(os_separator,init(version)['dll'])}") 
+        except:
+            upd_ver_creation_datetime = None
         
         if result_dict['error'] != None:
             error_trigger = 1                                                      # устанавливаем триггер ошибки

@@ -17,7 +17,7 @@ def send_msg(text, token, chat_id):
     }
     
     response = requests.post(send_message_url, data=payload)
-    log(f"Telegram text: {text}",3)
-    log(f"Telegram response: {response.json()}",3)
+    log(f"Telegram text: {text}",5)
+    log(f"Telegram response: {response.json()}",5)
  
  

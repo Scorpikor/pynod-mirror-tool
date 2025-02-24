@@ -12,13 +12,6 @@ import shutil
 import sys
 import datetime
 from inc.log import *
-from collections import deque
-import threading
-
-
-
-#from http import HTTPStatus
-from requests.exceptions import HTTPError
 # ==========================
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from ping3 import ping,verbose_ping
@@ -26,59 +19,73 @@ from ping3 import ping,verbose_ping
 
 def tools_download_file(session,download_dict):
     # Скачиваем файл, возвращаем размер файла в байтах
-    downloaded_size = 0
-    error = None                                                            # Маркер ошибки скачивания
-    error_text = ""                                                         # Текст ошибки
-    total_lines = os.get_terminal_size().lines - 1                          # Определяем высоту консоли
     log("tools.py:tools_download_file",5)
-    headers = {"User-Agent": download_dict['user_agent']}                   # Добавляем в хэдеры юзерагент
-    url = download_dict['download_url']                                     # URL для скачивания файла
-    bar_color = download_dict['colour'] 
+    headers = {"User-Agent": download_dict['user_agent']}
+    url = download_dict['download_url']
     log("tools.py:tools_download_file: Download URL: " + str(url),5)
-    path_to_save = download_dict['save_path']                               # Путь для сохранения файла
-    log(f"tools.py:tools_download_file: SAVE PATH: {path_to_save}",5)  
-    server_timeout = download_dict['server_timeout']                        # Таймаут операций подключения
+    
     # Добавляем авторизацию 
     if download_dict['server_user'] and download_dict['server_password']:
-        auth1 = (download_dict['server_user'], download_dict['server_password'])        
+        auth1 = (download_dict['server_user'], download_dict['server_password'])
+        
     else:
         auth1 = None
-                
-    # Проверяем, указан ли в словаре размер скачиваемого файла
+        
+    path_to_save = download_dict['save_path']
+    log("tools.py:tools_download_file: SAVE PATH: " + str(path_to_save),5)
+    server_timeout = download_dict['server_timeout']
+    
     if download_dict['file_size']:
         total_size = download_dict['file_size']
-        log(f"tools.py:tools_download_file: {url} Размер файла берем из update.ver: {total_size}",5)
-        leave = False
+        log("tools.py:tools_download_file: Размер файла берем из update.ver: " + str(total_size),5)
     else:
-        leave = True    # для того, чтоб было видно скачивание update.ver
+        try:
+            response = session.get(url, headers=headers, auth=auth1, stream=True, timeout=server_timeout)
+        except Exception as e:
+            log("tools.py:tools_download_file: Ошибка соеднинения с сервером. Сервер жив?:",4)
+            log (str(e),4)
+            log("tools.py:tools_download_file: Завершение работы скрипта!",4)
+            sys.exit(1)
+                   
+        log("tools.py:tools_download_file: Запрос к серверу: ",5)
+        log(str(response.request.headers),5)
+        log("tools.py:tools_download_file: Ответ от сервера:",5)
+        log(str(response.headers),5)
+        total_size = int(response.headers.get('content-length', 0))
+        log("tools.py:tools_download_file: Размер файла берем с сервера: " + str(total_size),5)
+        if response.status_code != 200:
+        
+            if response.status_code == 401:                
+                log("tools.py:tools_download_file: " + str(url) + " 401 Сервер требует авторизацию! Необходимо проверить правильность указанных данных авторизации в файле конфигурации!",4)                
+            if response.status_code == 403:                
+                log("tools.py:tools_download_file: " + str(url) + " 403 Доступ запрещен! Необходимо проверить правильность URL для скачивания!",4)                
+            if response.status_code == 404:                
+                log("tools.py:tools_download_file: " + str(url) + " 404 Файл на сервере не найден! Необходимо проверить правильность URL для скачивания!",4)                
+            else:
+                log("tools.py:tools_download_file: " + str(url) + " " + str(response.status_code) + " Ошибка",4)
+                
+            log("tools.py:tools_download_file: Завершение работы скрипта!",4)
+            sys.exit(1)
     
-    # Проверка существования файла и его размера у нас если размер указан в словаре
-    if os.path.exists(path_to_save) and download_dict['file_size']:
+    # Проверка существования файла и его размера у нас
+    if os.path.exists(path_to_save):
         local_file_size = os.path.getsize(path_to_save)  # Размер локального файла
         if local_file_size == total_size:
-            log(str(download_dict['text']) + " " + str(path_to_save) + " Файл уже существует " + str(local_file_size) + " байт.", 5)
-            return error, error_text,0, path_to_save # Возвращаем 0(байт) т.к. файл мы не скачивали с сервера
-
+            log(str(download_dict['text']) + " " + str(path_to_save) + " Файл уже существует " + str(local_file_size) + " байт.", 3)
+            return 0 # Возвращаем 0(байт) т.к. файл мы не скачивали с сервера
             
     # Если файл не существует или его размер отличается, выполняем загрузку
     try:
         response = session.get(url, headers=headers, auth=auth1, stream=True, timeout=server_timeout)
-        response.raise_for_status()
-        
+        if response.status_code == 404:                
+                log(str(url) + " Файл на сервере не найден! Необходимо проверить правильность URL для скачивания! Возможно, на сервере обновилась база.",4)
+                log("tools.py:tools_download_file: Завершение работы скрипта!",4)
+                sys.exit(1)
     except Exception as e:
-        error = 1
-        error_text = str(e)
-        # =======================================================
-        log(f"tools.py:tools_download_file: Ошибка соеднинения с сервером. Файл {url}",5)        
-        log (str(e),5)
-        return error, error_text, downloaded_size, path_to_save
-        #sys.exit(1)
-        
-    log(f"tools.py:tools_download_file: Запрос к серверу: {str(response.request.headers)}",5)
-    log(f"tools.py:tools_download_file: Ответ от сервера: {str(response.headers)}",5)
+        log("Произошла ошибка при скачивании: " + str(e),4)
+        log("tools.py:tools_download_file: Завершение работы скрипта!",4)
+        sys.exit(1)
     
-    total_size = int(response.headers.get('content-length', 0))    
-                    
     os.makedirs(os.path.dirname(path_to_save), exist_ok=True)
     with open(path_to_save, "wb") as file, tqdm(
         desc=download_dict['text'],
@@ -86,159 +93,14 @@ def tools_download_file(session,download_dict):
         unit='B',
         unit_scale=True,
         ascii=True,
-        colour = bar_color,
-        leave=leave,
+        colour ='green',       
         unit_divisor=1024,
     ) as bar:
-            try:
-            
-                for data in response.iter_content(chunk_size=1024):
-                    file.write(data)
-                    bar.update(len(data))
-            except Exception as e:
-                error = 1
-                error_text = str(e)
-                log (str(e),5)
-                return error, error_text, downloaded_size, path_to_save
-                
+        for data in response.iter_content(chunk_size=1024):
+            file.write(data)
+            bar.update(len(data))
     downloaded_size = os.path.getsize(path_to_save)
-    return error, error_text, downloaded_size, path_to_save
-
-    
-def move_cursor_to(x, y):
-    # Функция для перемещения курсора в указанное место
-    print(f"\033[{y};{x}H", end='')
-
-
-def clear_line():
-    # Функция для очистки строки
-    print("\033[K", end='')    
-        
-    
-def pbar_colour(number):
-    # выбираем цвет текста прогрессбара файла в зависимоссти от текущей попытки скачать файл
-    colors =[
-    'green',
-    'yellow',
-    'red'
-    ]
-    if number > 2:
-        number = 2
-    if number < 0:
-        number = 0
-    return colors[number]
-
-def download_files_concurrently(download_dict, files_to_download):
-    # Параллельная загрузка файлов
-    new_files =[]                                   # Список новых файлов с путями, сохраненных в хранилище 
-    error = None                                    # Статус скачивания файлов общий
-    error_text = ""                                 # Текст ошибки
-    stop_downloading = False                        # Флаг остановки загрузки
-    retries_all = 0                                 # счетчик кол-ва попыток перекачать файл из-за каких-либо проблем
-    os_separator = download_dict['os_separator']
-    version = download_dict['version']
-    desc = f"[{version}] Общий прогресс"            # сообщение индикатора выполнения
-    path_fix = download_dict['path_fix']            # корневая папка для хранения файлов баз в корне папки web сервера
-
-    # Прогресс-бар
-    pbar = tqdm(total=len(files_to_download), desc=desc, colour='cyan', ascii=True, unit="file")
-
-    def prepare_and_download(session, base_url, file_path, file_size, os_separator, version, retry_count):
-        # Подготовка словаря для скачивания каждого файла базы и вызов tools_download_file
-            
-        if not file_path.startswith("/"):               # фиксим путь, когда в update.ver файл не начинается с "/"
-            file_path = f"{path_fix}/{file_path}"
-            
-        file_url = f"{base_url}{file_path}"                                                 # url для скачивания файла
-        save_path = f"{download_dict['save_path']}{file_path.replace('/',os_separator)}"    # путь для сохранения файла   
-        
-        download_file_dict = {
-            'download_url': file_url,
-            'colour': pbar_colour(retry_count),
-            'save_path': save_path,
-            'user_agent': download_dict['user_agent'],
-            'server_user': download_dict['server_user'],
-            'server_password': download_dict['server_password'],
-            'server_timeout': download_dict['server_timeout'],
-            'file_size': file_size,
-            'text': f"[{version}] [{retry_count}] {file_path.split('/')[-1]}"  # Имя файла для отображения в tqdm
-        }
-        return tools_download_file(session, download_file_dict)
-
-    # Максимальное количество попыток
-    max_retries = download_dict['retry_probes']     # кол-во попыток скачать файл
-    max_workers = download_dict['max_workers']      # кол-во потоков скачивания
-    retry_count = {}                                # Счётчик попыток скачивания для каждого файла
-    downloaded_size_version_result = 0              # Общий размер скачанных данных
-    downloaded_files_version_result = 0             # Количество успешно скачанных файлов      
-    # =========================================================================
-    
-    # Очередь задач
-    task_queue = deque([(file_path, file_size) for file_path, file_size in files_to_download])
-
-    with ThreadPoolExecutor(max_workers= max_workers) as executor:
-        with requests.Session() as session:
-            futures = {}  # Активные задачи
-
-            # Пока есть задачи в очереди или активные задачи
-            while task_queue or futures:
-                # Заполняем пул задач
-                while task_queue : #and len(futures) < len(files_to_download)//2:
-                    if not stop_downloading:
-                        file_path, file_size = task_queue.popleft()  # Берём задачу из начала очереди
-                        future = executor.submit(
-                            prepare_and_download, session, download_dict['mirror_server'], file_path, file_size, os_separator, version, retry_count.get(file_path, 0)
-                        )
-                        futures[future] = (file_path, file_size)
-                    else:
-                        break
-
-                # Обрабатываем завершённые задачи
-                for future in as_completed(futures):
-                    
-                    file_path, file_size = futures.pop(future)
-
-                    # Выполнение функции tools_download_file
-                    err, err_text, downloaded_size, path_to_save = future.result()
-
-                    if err is None:  # Если файл скачан успешно
-                        new_files.append(path_to_save)  # добавляем путь к сохраненному в хранилище файлу
-                        if downloaded_size != 0:
-                            downloaded_size_version_result += downloaded_size
-                            downloaded_files_version_result += 1
-                    else:
-                        # Если ошибка, увеличиваем счётчик попыток
-                        retries_all += 1
-                        retry_count[file_path] = retry_count.get(file_path, 0) + 1
-                        log(f"tools.prepare_and_download : Ошибка скачивания файла: {file_path}. Добавляем в очередь для повторной попытки.  ",5)
-                        if retry_count[file_path] <= max_retries and not stop_downloading:
-                            # Добавляем задачу в начало очереди
-                            task_queue.appendleft((file_path, file_size))
-                        else:
-                            # Лимит попыток достигнут, останавливаем загрузку
-                            log(f"tools.prepare_and_download : Ошибка скачивания файла: {file_path}. Кол-во поыток скачать файл закончилось...",5)
-                            error = 1
-                            error_text += f"Ошибка: {file_path} пропущен после {max_retries} попыток. {err_text}\n"
-                            stop_downloading = True  # Устанавливаем флаг остановки
-                            #executor.shutdown(wait=False)
-                            #futures.clear()
-                            #task_queue.clear()
-                            #cancel_event.set()  # Устанавливаем событие для остановки всех задач
-                            break  # Прерываем цикл обработки задач
-
-                    # Обновляем прогресс-бар
-                    pbar.update(1)
-
-    pbar.close()
-
-    # Возвращаем:
-    # error                             - Ошибку, если была = 1 или не было = None
-    # error_text                        - Текст ошибки
-    # downloaded_size_version_result    - Размер скачанных файлов
-    # downloaded_files_version_result   - Количество скачанных файлов
-    # retries_all                       - общее кол-во попыток перекачать файл
-    # new_files                         - список сохраненных файлов в хранилище
-    return error, error_text, downloaded_size_version_result, downloaded_files_version_result, retries_all, new_files
+    return downloaded_size
     
 def move_file(source_path, destination_path):
     # Перемещаем файл
@@ -324,11 +186,10 @@ def list_files_and_folders(directory):
            file_list.append(os.path.join(dirpath, filename))
     return file_list
     
-def elements_to_delete(files_new, files_all):
-    # Из files_all убираем files_new, чтоб осталось то, что надо удалить
+def unique_elements(list1, list2):
+    # Из двух списков оставляем только уникальные не повторяющиеся значения
     log("tools.py:unique_elements",5)
-    return [target for target in files_all if target not in files_new]
-    
+    return list(set(list1) ^ set(list2))
     
 def delete_files(list):
     # Удаляем файлы согласно списка
@@ -351,7 +212,7 @@ def remove_empty_folders(directory):
 
 def file_creation_datetime(file_path):
     # Возвращает дату создания файла
-    creation_time = os.path.getmtime(file_path)
+    creation_time = os.path.getctime(file_path)
     creation_date = datetime.datetime.fromtimestamp(creation_time).strftime('%Y-%m-%d %H:%M:%S')
     return creation_date
 
@@ -418,16 +279,4 @@ def os_dir_separator():
         log("tools.py:choosing_the_best_server: Платформа, на которой запущен скрипт, не тестировалась!",4)
         log("tools.py:choosing_the_best_server: Если есть большая необходимость запустить скрипт именно на вашей платворме, обратитесь к автору скрипта.",4)
         log("tools.py:choosing_the_best_server: Завершение работы скрипта",4)
-        sys.exit(1)
-        
-        
-def init_filepath_fix(osseparator,filepath):
-    # фиксим путь в соответствии с ОС
-    return filepath.replace('/', osseparator)
-    
-def error_text_fix(text):
-    # Удаляем потенциально опасные символы, из-за которых может не отправиться сообщение в телеграм
-    text = text.translate(str.maketrans({"<": "", ">": "", "'": "", '"': ""}))
-    return text
-    
     

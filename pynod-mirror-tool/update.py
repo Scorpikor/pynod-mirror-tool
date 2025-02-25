@@ -101,25 +101,34 @@ if __name__ == "__main__":
                 except:
                     error_string = str(error_string[0:250]) + "..."
                     
-            error_text.append(f"❌ [{version}] {error_text_fix(error_string)}")       # пишем сообщение  ошибки
-            
+            error_text.append(f"❌ [{version}] {error_text_fix(error_string)}")       # пишем сообщение  ошибки            
             log(f"Ошибка скачивания баз версии [{version}]" ,4)
             log(f"Причина: {result_dict['error_text']}" ,4)
         else:
-            if result_dict['retries_all'] != 0:
-                retries_string = f"Повторных загрузок   : {result_dict['retries_all']} ⚠️"
-            else:
-                retries_string = ""
-                
-            error_text.append("<code>"+\
+            status_text = ""
+            status_text += "<code>"\
             f"✅ [{version}] {result_dict['base_version']}\n"+\
             f"Последнее обновление : {upd_ver_creation_datetime}\n"+\
             f"Последняя проверка   : {update_date}\n"+\
             f"Файлов в базе версии : {result_dict['full_number_of_files_dir']}\n"+\
-            f"Размер базы          : {sizeof_fmt(result_dict['full_size_dir'])}\n"+\
-            f"{retries_string if retries_string else''}\n"+\
-             
-            "</code>")
+            f"Размер базы          : {sizeof_fmt(result_dict['full_size_dir'])}\n"
+                       
+            if result_dict['retries_all'] != 0:
+                status_text += f"Повторных загрузок   : {result_dict['retries_all']} ⚠️\n"
+            
+            status_text += f"Скачали              : {sizeof_fmt(result_dict['downloaded_size_versionown'])}\n"
+            status_text += f"Скачали файлов       : {result_dict['downloaded_files_version']}\n"
+            
+            status_text += "</code>"    
+                
+            error_text.append(status_text)
+            
+            
+            
+            
+        downloaded_files_all += result_dict['downloaded_files_version']
+        downloaded_size_all += result_dict['downloaded_size_versionown']
+        
         log(f"{'-'*50}",2)
         log(f"Скачано файлов для базы текущей версии : {result_dict['downloaded_files_version']}",2)
         log(f"Размер скачанных файлов текущей версии : {sizeof_fmt(result_dict['downloaded_size_versionown'])}",2 )
@@ -130,13 +139,19 @@ if __name__ == "__main__":
         log(f"Размер папки с базами       [{version}]: {sizeof_fmt(result_dict['full_size_dir'])}" ,2)
         log(f"{'-'*50}",2)                
         print("\n"*3)
-
+        
 
 
         
-    end_time = str(convert_seconds(time.time() - start_time))    
-    log("Время выполнения скрипта: " + end_time ,2)
-    
+    end_time = str(convert_seconds(time.time() - start_time))
+    full_base_size = (folder_size(web_server_root + prefix_config))
+    log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
+    log(f"Всего скачано файлов        : {downloaded_files_all}",2)
+    log(f"Размер всех скачанных файлов: {sizeof_fmt(downloaded_size_all)}",2)
+    log(f"Полный размер всех баз {web_server_root + prefix_config} : {sizeof_fmt(full_base_size)}",2)
+    log(f"Время выполнения скрипта: {end_time}" ,2)
+    log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
+    print()
     # Отправка в телеграмм
     if str(config.get('TELEGRAM','telegram_inform')) == "1":    
         info = ""
@@ -150,7 +165,12 @@ if __name__ == "__main__":
         for txt in error_text:
             info +=f"{txt}\n"
                 
-        
-        send_msg(f"{msg_prefix} {update_date} Скрипт был выполнен \n\n {info}", token, chat_id)
+        info += '<code>'+'-'*43 + "\n"
+        info += f"Всего скачано файлов        : {downloaded_files_all}\n"
+        info += f"Размер всех скачанных файлов: {sizeof_fmt(downloaded_size_all)}\n"
+        info += f"Полный размер всех баз      : {sizeof_fmt(full_base_size)}\n"
+        info += f"Время выполнения скрипта    : {end_time}\n"
+        info += "</code>\n"
+        send_msg(f"{msg_prefix} {update_date} Сервер: {os.uname()[1]} \n\n {info}", token, chat_id)
         
     

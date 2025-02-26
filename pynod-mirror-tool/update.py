@@ -165,12 +165,13 @@ if __name__ == "__main__":
         for txt in error_text:
             info +=f"{txt}\n"
                 
-        info += '<code>'+'-'*43 + "\n"
+        info += '<code>'+'-'*36 + "\n"
         info += f"Всего скачано файлов        : {downloaded_files_all}\n"
         info += f"Размер всех скачанных файлов: {sizeof_fmt(downloaded_size_all)}\n"
         info += f"Полный размер всех баз      : {sizeof_fmt(full_base_size)}\n"
         info += f"Время выполнения скрипта    : {end_time}\n"
         info += "</code>\n"
-        send_msg(f"{msg_prefix} {update_date} Сервер: {os.uname()[1]} \n\n {info}", token, chat_id)
+        log(f"Кол-во символов в сообщении Telegram : {len(info)}",2)
+        send_msg(f"<code>{msg_prefix} {update_date}\n[Сервер: {platform.node()}]</code>\n\n {info}", token, chat_id)
         
     

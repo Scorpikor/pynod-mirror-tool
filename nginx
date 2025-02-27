@@ -19,10 +19,10 @@ server {
 	real_ip_header X-Real-IP;
 	real_ip_recursive on;
 
-    location = /index.html {
+        location = /index.html {
 	root $root_path;          # Устанавливаем начальный root
         try_files $uri =404;      # Ищем index.html в этом каталоге
-    }
+        }
 
 	# Логика для update.ver
         location ~* \.ver$ {

@@ -20,7 +20,7 @@ server {
 	real_ip_recursive on;
 
     location = /index.html {
-		root $root_path;  # Устанавливаем начальный root
+	root $root_path;          # Устанавливаем начальный root
         try_files $uri =404;      # Ищем index.html в этом каталоге
     }
 

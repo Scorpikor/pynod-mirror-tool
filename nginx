@@ -20,8 +20,8 @@ server {
 	real_ip_recursive on;
 
     location = /index.html {
-		root /var/www/nod32mirror;  # Устанавливаем начальный root
-        try_files $uri =404;         # Ищем index.html в этом каталоге
+		root $root_path;  # Устанавливаем начальный root
+        try_files $uri =404;      # Ищем index.html в этом каталоге
     }
 
 	# Логика для update.ver

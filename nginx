@@ -44,7 +44,7 @@ server {
                 set $ver_path v10;
                 }
 		
-                root $root_path/data/$ver_path;		# ЕСЛИ В nod32ms.conf МЕНЯЛИ prefix, ТО data ЗАМЕНИТЬ НА НОВЫЙ prefix В nod32ms.conf
+                root $root_path/data/$ver_path;		# ЕСЛИ В nod32ms.conf МЕНЯЛИ prefix, ТО data ЗАМЕНИТЬ НА НОВЫЙ prefix ИЗ nod32ms.conf
                 try_files $uri $uri/ =404;
                 }
 

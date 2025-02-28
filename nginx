@@ -9,7 +9,7 @@ server {
 
         listen [::]:80;
         listen      80;
-        root /var/www/nod32mirror;
+        root /var/www/nod32mirror;	# НАСТРОИТЬ ПОД СВОЙ СЕРВЕР
         server_name _;
         index index.html;
         
@@ -44,7 +44,7 @@ server {
                 set $ver_path v10;
                 }
 		
-                root $root_path/data/$ver_path;
+                root $root_path/data/$ver_path;		# ЕСЛИ В nod32ms.conf МЕНЯЛИ prefix, ТО data ЗАМЕНИТЬ НА НОВЫЙ prefix В nod32ms.conf
                 try_files $uri $uri/ =404;
                 }
 

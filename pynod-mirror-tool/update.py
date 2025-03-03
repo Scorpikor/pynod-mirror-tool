@@ -12,6 +12,7 @@ from inc.tools import *
 from inc.parser import *
 from inc.telegram import *
 from inc.log import *
+from inc.web import *
 
 if __name__ == "__main__":
     print("\n"*3)
@@ -27,8 +28,9 @@ if __name__ == "__main__":
     config.read(current_directory + os_separator +'nod32ms.conf',encoding='utf-8')
     versions_to_update = parser_config_versions_to_update(current_directory + os_separator + 'nod32ms.conf')  # список версий баз антивируса для обновления
     official_servers_update = int(config.get('CONNECTION','official_servers_update'))
-    connection_retry_probes = int(config.get('CONNECTION','mirror_connect_retries'))        # Kол-во попыток скачать файл
-    max_workers = int(config.get('CONNECTION','max_workers'))
+    mirror_connect_retries = int(config.get('CONNECTION','mirror_connect_retries'))        # Kол-во попыток скачать файл
+    max_workers = int(config.get('CONNECTION','max_workers'))                   # Кол-во потоков загрузки баз
+    web_page_data = []                                                          # Для формирования WEB страницы отчета
     #
     if os_platform == 'Linux':
         web_server_root = str(config.get('SCRIPT','linux_web_dir'))             # Путь к корню веб сервера, где будем хранить базы
@@ -66,7 +68,7 @@ if __name__ == "__main__":
         'os_separator': os_separator,
         'current_directory': current_directory,
         'mirror_server':mirror_server,
-        'retry_probes': connection_retry_probes,
+        'mirror_connect_retries': mirror_connect_retries,
         'max_workers' : max_workers,
         'server_user': server_user,
         'server_password': server_password,
@@ -92,6 +94,8 @@ if __name__ == "__main__":
             upd_ver_creation_datetime = None
         
         if result_dict['error'] != None:
+            log(f"Ошибка скачивания баз версии [{version}]" ,4)
+            log(f"Причина: {result_dict['error_text']}" ,4)
             error_trigger = 1                                                      # устанавливаем триггер ошибки
             # срезаем длинный текст ошибки
             error_string = result_dict['error_text']
@@ -101,9 +105,10 @@ if __name__ == "__main__":
                 except:
                     error_string = str(error_string[0:250]) + "..."
                     
-            error_text.append(f"❌ [{version}] {error_text_fix(error_string)}")       # пишем сообщение  ошибки            
-            log(f"Ошибка скачивания баз версии [{version}]" ,4)
-            log(f"Причина: {result_dict['error_text']}" ,4)
+            error_text.append(f"❌ [{version}] {error_text_fix(error_string)}")       # пишем сообщение  ошибки
+            web_page_data.append([1,str(version),str(error_string)])
+            
+            
         else:
             status_text = ""
             status_text += "<code>"\
@@ -122,7 +127,18 @@ if __name__ == "__main__":
             status_text += "</code>"    
                 
             error_text.append(status_text)
-            
+            web_page_data.append([0,                                            # флаг ошибки
+                                str(version),                                   # Версия антивируса
+                                str(result_dict['base_version']),               # Версия баз
+                                str(result_dict['retries_all']),                # Повторных загрузок
+                                str(result_dict['downloaded_files_version']),   # Скачано файлов для базы текущей версии
+                                str(sizeof_fmt(result_dict['downloaded_size_versionown'])),   # Размер скачанных файлов текущей версии
+                                str(result_dict['trash_files_deleted']),        # Удалено
+                                str(upd_ver_creation_datetime),                 # Базы обновились дата                                
+                                str(update_date),                               # Последняя проверка дата
+                                str(result_dict['full_number_of_files_dir']),   # файлов
+                                str(sizeof_fmt(result_dict['full_size_dir'])),  # Размер базы
+                                ])
             
             
             
@@ -152,7 +168,15 @@ if __name__ == "__main__":
     log(f"Время выполнения скрипта: {end_time}" ,2)
     log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
     print()
-    # Отправка в телеграмм
+    web_page_data.append([0,"","","","","","","","","Скачано всего, файлов",str(downloaded_files_all)])
+    web_page_data.append([0,"","","","","","","","","Скачано всего, размер",str(sizeof_fmt(result_dict['downloaded_size_versionown']))])
+    web_page_data.append([0,"","","","","","","","","Полный размер всех баз",str(sizeof_fmt(full_base_size))])
+    web_page_data.append([0,"","","","","","","","","Время выполнения скрипта",str(end_time)])
+    
+    if config.get('LOG','generate_web_page') == "1":
+        web_page_generator(web_page_data,config.get('LOG','generate_table_only'),init_filepath_fix(os_separator,config.get('LOG','html_table_path_file')))
+    
+    # Формируем сообщение для Telegram
     if str(config.get('TELEGRAM','telegram_inform')) == "1":    
         info = ""
         token = config.get('TELEGRAM','token')

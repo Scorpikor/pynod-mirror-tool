@@ -106,7 +106,7 @@ if __name__ == "__main__":
                     error_string = str(error_string[0:250]) + "..."
                     
             error_text.append(f"❌ [{version}] {error_text_fix(error_string)}")       # пишем сообщение  ошибки
-            web_page_data.append([1,str(version),str(error_string)])
+            web_page_data.append([1,str(version),str(error_string),"","","","","","","",""])
             
             
         else:

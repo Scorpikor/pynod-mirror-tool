@@ -9,29 +9,46 @@ def web_page_generator(data, only_table, file_path):
         <tr class="c_blue">\n\
             <th>Версия</th>\n\
             <th>Версия баз</th>\n\
+            <th>П</th>\n\
+            <th>Скачали</th>\n\
+            <th>Скачали</th>\n\
+            <th>Удалено</th>\n\
             <th>Базы обновились</th>\n\
             <th>Последняя проверка</th>\n\
-            <th>Файлов</th>\n\
+            <th>Файлов в базе</th>\n\
             <th>Размер базы</th>\n\
         </tr>\n"""
-    for a,b,c,d,e,f in data:
-        if a =="" and b =="" and c == "" and d =="":
-            html_table_content +=f"""\
-        <tr class='c_back'>\n\
-            <td colspan="4">\n\
-            <td>{e}</td>\n\
-            <td>{f}</td>\n\
-        </tr>\n"""
-        else:
-            html_table_content +=f"""\
-        <tr class='c_back'>\n\
-            <td>{a}</td>\n\
-            <td>{b}</td>\n\
-            <td>{c}</td>\n\
-            <td>{d}</td>\n\
-            <td>{e}</td>\n\
-            <td>{f}</td>\n\
-        </tr>\n"""
+    for status,a,b,c,d,e,f,g,h,i,j in data:
+        if status == 0:                          # строка без ошибки закачки
+        
+            if a =="" and b =="" and c == "" and d =="" and e=="" and f == "" and g =="" and h=="" :
+                html_table_content +=f"""\
+                <tr class='c_back'>\n\
+                    <td colspan="8">\n\
+                    <td>{i}</td>\n\
+                    <td>{j}</td>\n\
+                </tr>\n"""
+            else:
+                html_table_content +=f"""\
+                <tr class='c_back'>\n\
+                    <td>{a}</td>\n\
+                    <td>{b}</td>\n\
+                    <td>{c}</td>\n\
+                    <td>{d}</td>\n\
+                    <td>{e}</td>\n\
+                    <td>{f}</td>\n\
+                    <td>{g}</td>\n\
+                    <td>{h}</td>\n\
+                    <td>{i}</td>\n\
+                    <td>{j}</td>\n\
+                </tr>\n"""
+        if status == 1:
+                html_table_content +=f"""\
+                <tr class='c_back'>\n\
+                    <td colspan="8">\n\
+                    <td>{a}</td>\n\
+                    <td>{b}</td>\n\
+                </tr>\n"""
                                         
             
     html_table_content += """\

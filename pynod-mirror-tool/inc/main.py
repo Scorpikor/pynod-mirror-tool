@@ -26,7 +26,7 @@ def download_av_base_version (version, connect_dict):
     our_DB_version = 0
     
     with requests.Session() as session:                                     # Создаём сессию
-            retries = Retry(total=connect_dict['retry_probes'],
+            retries = Retry(total=connect_dict['mirror_connect_retries'],
                       backoff_factor=0.4,
                       status_forcelist=[ 429, 500, 502, 503, 504 ])
             session.mount('http://', HTTPAdapter(max_retries=retries))
@@ -60,7 +60,8 @@ def download_av_base_version (version, connect_dict):
                 'user_agent': connect_user_agent,                                                                               # Юзер агент, для подключения к серверу
                 'server_user': connect_dict['server_user'],                                                                     # Логин для подключения к серверу
                 'server_password': connect_dict['server_password'],                                                             # Пароль для подключения к серверу
-                'server_timeout': connect_dict['server_timeout']                                                                # Таймаут операций подключения   
+                'server_timeout': connect_dict['server_timeout'],                                                               # Таймаут операций подключения
+                'mirror_connect_retries': connect_dict['mirror_connect_retries']                                                                    # Кол-во попытак скачать файл
                 }
             ####print(download_dict)
             # Ожидаем на выходе:
@@ -123,7 +124,7 @@ def download_av_base_version (version, connect_dict):
                     'server_user': connect_dict['server_user'],                  # логин для подключения к серверу
                     'server_password': connect_dict['server_password'],          # пароль для подключения к серверу
                     'server_timeout': connect_dict['server_timeout'],            # таймаут операций скачивания
-                    'retry_probes' : connect_dict['retry_probes'],               # кол-во попыток перекачать файл
+                    'mirror_connect_retries' : connect_dict['mirror_connect_retries'],     # кол-во попыток перекачать файл
                     'max_workers' : connect_dict['max_workers'],                 # кол-во потоков скачивания
                     }
                     

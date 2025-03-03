@@ -16,20 +16,19 @@ from collections import deque
 import threading
 
 
-
 #from http import HTTPStatus
 from requests.exceptions import HTTPError
 # ==========================
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from ping3 import ping,verbose_ping
 
-
+    
 def tools_download_file(session,download_dict):
     # Скачиваем файл, возвращаем размер файла в байтах
     downloaded_size = 0
     error = None                                                            # Маркер ошибки скачивания
     error_text = ""                                                         # Текст ошибки
-    #total_lines = os.get_terminal_size().lines - 1                          # Определяем высоту консоли
+    mirror_connect_retries = ['mirror_connect_retries']                     # кол-во попыток перекачать файл
     log("tools.py:tools_download_file",5)
     headers = {"User-Agent": download_dict['user_agent']}                   # Добавляем в хэдеры юзерагент
     url = download_dict['download_url']                                     # URL для скачивания файла
@@ -102,6 +101,13 @@ def tools_download_file(session,download_dict):
                 return error, error_text, downloaded_size, path_to_save
                 
     downloaded_size = os.path.getsize(path_to_save)
+    
+    if downloaded_size != total_size:
+        error = 1
+        error_text =  f"Размер скачанного файла ({downloaded_size} байт) не совпадает с ожидаемым ({total_size} байт)"
+        log(error_text, 3) 
+    
+    
     return error, error_text, downloaded_size, path_to_save
 
     
@@ -166,7 +172,7 @@ def download_files_concurrently(download_dict, files_to_download):
         return tools_download_file(session, download_file_dict)
 
     # Максимальное количество попыток
-    max_retries = download_dict['retry_probes']     # кол-во попыток скачать файл
+    max_retries = download_dict['mirror_connect_retries']     # кол-во попыток скачать файл
     max_workers = download_dict['max_workers']      # кол-во потоков скачивания
     retry_count = {}                                # Счётчик попыток скачивания для каждого файла
     downloaded_size_version_result = 0              # Общий размер скачанных данных

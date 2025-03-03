@@ -27,6 +27,7 @@ def web_page_generator(data, only_table, file_path):
                     <td colspan="8">\n\
                     <td>{i}</td>\n\
                     <td>{j}</td>\n\
+                    
                 </tr>\n"""
             else:
                 html_table_content +=f"""\
@@ -45,9 +46,10 @@ def web_page_generator(data, only_table, file_path):
         if status == 1:
                 html_table_content +=f"""\
                 <tr class='c_back'>\n\
-                    <td colspan="8">\n\
+                    
                     <td>{a}</td>\n\
-                    <td>{b}</td>\n\
+                    
+                    <td colspan="9">{b}</td>\n\
                 </tr>\n"""
                                         
             

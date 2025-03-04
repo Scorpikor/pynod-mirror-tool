@@ -30,7 +30,9 @@ def tools_download_file(session,download_dict):
     error_text = ""                                                         # Текст ошибки
     mirror_connect_retries = ['mirror_connect_retries']                     # кол-во попыток перекачать файл
     log("tools.py:tools_download_file",5)
-    headers = {"User-Agent": download_dict['user_agent']}                   # Добавляем в хэдеры юзерагент
+    headers = {"User-Agent": download_dict['user_agent'],                   # Добавляем в хэдеры юзерагент
+                #"Accept-Encoding": "identity"                               # запрашиваем файлы без сжатия
+                }                   
     url = download_dict['download_url']                                     # URL для скачивания файла
     bar_color = download_dict['colour'] 
     log("tools.py:tools_download_file: Download URL: " + str(url),5)
@@ -102,7 +104,7 @@ def tools_download_file(session,download_dict):
                 
     downloaded_size = os.path.getsize(path_to_save)
     
-    if downloaded_size != total_size:
+    if response.headers.get('Content-Encoding') != 'gzip' and downloaded_size != total_size:
         error = 1
         error_text =  f"Размер скачанного файла ({downloaded_size} байт) не совпадает с ожидаемым ({total_size} байт)"
         log(error_text, 3) 

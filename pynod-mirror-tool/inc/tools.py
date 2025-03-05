@@ -422,6 +422,9 @@ def os_dir_separator():
     elif os_platform == "Windows":
         log("tools.py:os_dir_separator: Используем платформу Windows",2)
         return os_platform, "\\"
+    elif os_platform == "FreeBSD":
+        log("tools.py:os_dir_separator: Используем платформу FreeBSD",2)
+        return os_platform, "/"
     else:
         log("tools.py:choosing_the_best_server: Платформа, на которой запущен скрипт, не тестировалась!",4)
         log("tools.py:choosing_the_best_server: Если есть большая необходимость запустить скрипт именно на вашей платворме, обратитесь к автору скрипта.",4)

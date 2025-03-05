@@ -36,6 +36,8 @@ if __name__ == "__main__":
         web_server_root = str(config.get('SCRIPT','linux_web_dir'))             # Путь к корню веб сервера, где будем хранить базы
     elif os_platform == 'Windows':
         web_server_root = str(config.get('SCRIPT','windows_web_dir'))
+    elif os_platform == 'FreeBSD':
+        web_server_root = str(config.get('SCRIPT','linux_web_dir'))
     else:
         log("Скрипт запущен на неопределенной платформе. Не понятно какие переменные для нее использовать.",4)
         log("Завершение работы скрипта....",4)

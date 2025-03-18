@@ -24,15 +24,21 @@ from ping3 import ping,verbose_ping
 
     
 def tools_download_file(session,download_dict):
-    # Скачиваем файл, возвращаем размер файла в байтах
-    downloaded_size = 0
+    # Скачиваем файл, возвращаем error, error_text, downloaded_size, path_to_save
+    downloaded_size = 0                                                     # счетчик 
     error = None                                                            # Маркер ошибки скачивания
     error_text = ""                                                         # Текст ошибки
-    mirror_connect_retries = ['mirror_connect_retries']                     # кол-во попыток перекачать файл
+    mirror_connect_retries = download_dict['mirror_connect_retries']        # кол-во попыток перекачать файл
     log("tools.py:tools_download_file",5)
+    
+    # Хэдэры для обычного скачивания
     headers = {"User-Agent": download_dict['user_agent'],                   # Добавляем в хэдеры юзерагент
-                #"Accept-Encoding": "identity"                               # запрашиваем файлы без сжатия
-                }                   
+                }
+    # Хэдэры для запроса размера файла в несжатом виде
+    headers_identity = {"User-Agent": download_dict['user_agent'],          # Добавляем в хэдеры юзерагент
+               "Accept-Encoding": "identity"                                # запрашиваем файлы без сжатия
+                }
+                
     url = download_dict['download_url']                                     # URL для скачивания файла
     bar_color = download_dict['colour'] 
     log("tools.py:tools_download_file: Download URL: " + str(url),5)
@@ -51,6 +57,7 @@ def tools_download_file(session,download_dict):
         log(f"tools.py:tools_download_file: {url} Размер файла берем из update.ver: {total_size}",5)
         leave = False
     else:
+        log(f"tools.py:tools_download_file: Размер файла во входящем словаре не указан {url}",5)
         leave = True    # для того, чтоб было видно скачивание update.ver
     
     # Проверка существования файла и его размера у нас если размер указан в словаре
@@ -75,11 +82,29 @@ def tools_download_file(session,download_dict):
         return error, error_text, downloaded_size, path_to_save
         #sys.exit(1)
         
-    log(f"tools.py:tools_download_file: Запрос к серверу: {str(response.request.headers)}",5)
-    log(f"tools.py:tools_download_file: Ответ от сервера: {str(response.headers)}",5)
+    log(f"tools.py:tools_download_file: Запрос к серверу - 1: {str(response.request.headers)}",5)
+    log(f"tools.py:tools_download_file: Ответ от сервера - 1: {str(response.headers)}",5)
     
-    total_size = int(response.headers.get('content-length', 0))    
-                    
+    # Разбор размера файла
+    # Нам нужен размер несжатого файла с сервера
+    total_size = int(response.headers.get('content-length', 0)) 
+    encoding = response.headers.get('Content-Encoding', 'identity')
+    if encoding != 'identity':                  # надо запросить у сервера не сжатый размер файла    
+        try:
+            response2 = session.get(url, headers=headers_identity, auth=auth1, timeout=server_timeout)
+            response2.raise_for_status()
+            total_size_identity = int(response2.headers.get('content-length', 0))
+            log(f"tools.py:tools_download_file: Запрос к серверу - 2: {str(response2.request.headers)}",5)
+            log(f"tools.py:tools_download_file: Ответ от сервера - 2: {str(response2.headers)}",5)
+            
+        except Exception as e:
+            error = 1
+            error_text = str(e)
+            # =======================================================
+            log(f"tools.py:tools_download_file: Ошибка соеднинения с сервером. Файл {url}",5)        
+            log (str(e),5)
+            return error, error_text, downloaded_size, path_to_save
+                                    
     os.makedirs(os.path.dirname(path_to_save), exist_ok=True)
     with open(path_to_save, "wb") as file, tqdm(
         desc=download_dict['text'],
@@ -89,6 +114,7 @@ def tools_download_file(session,download_dict):
         ascii=True,
         colour = bar_color,
         leave=leave,
+        #position=0,
         unit_divisor=1024,
     ) as bar:
             try:
@@ -96,6 +122,7 @@ def tools_download_file(session,download_dict):
                 for data in response.iter_content(chunk_size=1024):
                     file.write(data)
                     bar.update(len(data))
+                    #time.sleep(0.2)
             except Exception as e:
                 error = 1
                 error_text = str(e)
@@ -103,15 +130,62 @@ def tools_download_file(session,download_dict):
                 return error, error_text, downloaded_size, path_to_save
                 
     downloaded_size = os.path.getsize(path_to_save)
+            
+    if encoding == 'identity':
+        # Изначальный размер файл указан как для не сжатого
+        if downloaded_size != total_size:
+            error = 1
+            error_text =  f"Размер скачанного файла ({downloaded_size} байт) не совпадает с ожидаемым ({total_size} байт)"
+            log(error_text, 3)
+        else:
+            log(f"Размер скачанного файла ({downloaded_size} байт) совпадает с тем, что заявил сервер ({total_size} байт)", 5)
+    else:
+        # Если изначальный размер файла был указан как сжатый
+        # Проверяем размер по второму запросу response2
+        encoding2 = response2.headers.get('Content-Encoding', 'identity')
+        response2.close()
+        
+        # Проверяем, получили ли от сервера размер несжатого файла
+        if encoding2 == 'identity':
+            # Запрос response2 вернул не сжатый размер файла
+            if downloaded_size != total_size_identity:
+                # Размер не совпадает с ожидаемым
+                error = 1
+                error_text =  f"Кодировка {encoding}. Размер скачанного файла ({downloaded_size} байт) не совпадает с ожидаемым ({total_size_identity} байт)"
+                log(error_text, 3)
+            else:
+                log(f"Кодировка {encoding}. Размер скачанного файла ({downloaded_size} байт) совпадает с ожидаемым ({total_size_identity} байт)", 5)
+        else:                
+            log(f"Кодировка {encoding}. Сервер не отдал не сжатый размер файла, поэтому оставляем без проверки файл", 3)
+        
     
-    if response.headers.get('Content-Encoding') != 'gzip' and downloaded_size != total_size:
-        error = 1
-        error_text =  f"Размер скачанного файла ({downloaded_size} байт) не совпадает с ожидаемым ({total_size} байт)"
-        log(error_text, 3) 
-    
-    
+    response.close()
+    #sys.exit(1)
     return error, error_text, downloaded_size, path_to_save
 
+def update_ver_remove_categories(filepath, categories_to_remove):
+    # Удаляем категории из update.ver , напр. [SERVERS],[LINKS],[HOSTS]
+    remove_flag = 0
+    with open(filepath, "r") as inp, open(filepath + ".out", "w") as out:
+        inside_removed_category = False  # Флаг, находимся ли мы внутри удаляемой секции
+        for line in inp:
+                stripped_line = line.strip()
+                # Проверяем, начинается ли новая категория
+                if stripped_line.startswith("[") and stripped_line.endswith("]"):
+                    inside_removed_category = stripped_line in categories_to_remove
+                    if inside_removed_category:
+                        remove_flag = 1
+
+                # Если мы НЕ внутри удаляемой категории, записываем строку
+                if not inside_removed_category:
+                    out.write(line)
+    shutil.move(filepath + ".out", filepath)
+    if remove_flag !=0:
+        log(f"Файл  {filepath} был очищен от катекорий {categories_to_remove}", 3)
+    else:
+        log(f"В файле {filepath} категории для очистки не найдены {categories_to_remove}", 3)
+        
+    
     
 def move_cursor_to(x, y):
     # Функция для перемещения курсора в указанное место
@@ -168,6 +242,7 @@ def download_files_concurrently(download_dict, files_to_download):
             'server_user': download_dict['server_user'],
             'server_password': download_dict['server_password'],
             'server_timeout': download_dict['server_timeout'],
+            'mirror_connect_retries': download_dict['mirror_connect_retries'],
             'file_size': file_size,
             'text': f"[{version}] [{retry_count}] {file_path.split('/')[-1]}"  # Имя файла для отображения в tqdm
         }
@@ -237,8 +312,7 @@ def download_files_concurrently(download_dict, files_to_download):
                     # Обновляем прогресс-бар
                     pbar.update(1)
 
-    pbar.close()
-
+    pbar.close()    
     # Возвращаем:
     # error                             - Ошибку, если была = 1 или не было = None
     # error_text                        - Текст ошибки
@@ -257,6 +331,7 @@ def move_file(source_path, destination_path):
     
 def modify_update_ver(updatever_file_path, prefix):
     # Функция модифицирует в update.ver параметр file, добавляя префикс
+    # DEPRECATED
     log("tools.py:modify_update_ver",5)
     log("UPDATE.VER prefix: " + str(prefix),5)
     with open(updatever_file_path, 'r') as file:

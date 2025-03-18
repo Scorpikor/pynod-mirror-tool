@@ -45,7 +45,7 @@ def download_av_base_version (version, connect_dict):
             # ==========================
             # Скачиваем update.ver в tmp
             # ===========================
-            log(f"Скачиваем файл update.ver ",2)
+            log(f"[{version}] Скачиваем файл update.ver ",2)
             download_text = ' update.ver'
             download_time = str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
             tmp_updatever_filepath = f"{connect_dict['current_directory']}{os_separator}tmp{os_separator}update.ver"
@@ -137,7 +137,11 @@ def download_av_base_version (version, connect_dict):
                 else:
                     if our_DB_version != alien_DB_version:
                         log("Успешно обновились с версии " + str(our_DB_version) + " до версии " + str(alien_DB_version),2)
-                        # Копируем update.ver в хранилище
+                        # Вычищаем update.ver от лишних категорий
+                        categories_to_remove = {"[SERVERS]", "[LINKS]", "[HOSTS]"}
+                        update_ver_remove_categories(tmp_updatever_filepath, categories_to_remove)
+                        
+                        # копируем update.ver в хранилище
                         updatever_storage_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll'])}"
                         log (f"[{version}] Перемещаем update.ver в хранилище : {updatever_storage_path}",1)
                         move_file(tmp_updatever_filepath, updatever_storage_path)

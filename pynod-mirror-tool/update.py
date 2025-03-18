@@ -95,7 +95,9 @@ if __name__ == "__main__":
         except:
             upd_ver_creation_datetime = None
         
-        if result_dict['error'] != None:
+        
+        status_text = ""
+        if result_dict['error'] != None:            
             log(f"Ошибка скачивания баз версии [{version}]" ,4)
             log(f"Причина: {result_dict['error_text']}" ,4)
             error_trigger = 1                                                      # устанавливаем триггер ошибки
@@ -113,12 +115,12 @@ if __name__ == "__main__":
             
         else:
             status_text = ""
-            status_text += "<code>"\
-            f"✅ [{version}] {result_dict['base_version']}\n"+\
-            f"Последнее обновление : {upd_ver_creation_datetime}\n"+\
-            f"Последняя проверка   : {update_date}\n"+\
-            f"Файлов в базе версии : {result_dict['full_number_of_files_dir']}\n"+\
-            f"Размер базы          : {sizeof_fmt(result_dict['full_size_dir'])}\n"
+            
+            status_text += f"✅ [{version}] {result_dict['base_version']}\n"+\
+                           f"Последнее обновление : {upd_ver_creation_datetime}\n"+\
+                           f"Последняя проверка   : {update_date}\n"+\
+                           f"Файлов в базе версии : {result_dict['full_number_of_files_dir']}\n"+\
+                           f"Размер базы          : {sizeof_fmt(result_dict['full_size_dir'])}\n"
                        
             if result_dict['retries_all'] != 0:
                 status_text += f"Повторных загрузок   : {result_dict['retries_all']} ⚠️\n"
@@ -126,7 +128,7 @@ if __name__ == "__main__":
             status_text += f"Скачали              : {sizeof_fmt(result_dict['downloaded_size_versionown'])}\n"
             status_text += f"Скачали файлов       : {result_dict['downloaded_files_version']}\n"
             
-            status_text += "</code>"    
+            #status_text += "</code>"    
                 
             error_text.append(status_text)
             web_page_data.append([0,                                            # флаг ошибки
@@ -187,6 +189,14 @@ if __name__ == "__main__":
             msg_prefix = "✅"
         else:
             msg_prefix = "🆘"
+        
+        
+        try:
+            text = config.get('TELEGRAM','text').strip()
+        except:
+            text = ""
+        if text !="":
+            text += "\n"
             
         for txt in error_text:
             info +=f"{txt}\n"
@@ -197,7 +207,10 @@ if __name__ == "__main__":
         info += f"Полный размер всех баз      : {sizeof_fmt(full_base_size)}\n"
         info += f"Время выполнения скрипта    : {end_time}\n"
         info += "</code>\n"
-        log(f"Кол-во символов в сообщении Telegram : {len(info)}",2)
-        send_msg(f"<code>{msg_prefix} {update_date}\n[Сервер: {platform.node()}]</code>\n\n {info}", token, chat_id)
+        
+        
+        t_msg = f"<code>{msg_prefix} {update_date}\n[Сервер: {platform.node()}]\n{text}\n{info}</code>"
+        log(f"Кол-во символов в сообщении Telegram : {len(t_msg)}",3)
+        send_msg(t_msg, token, chat_id)
         
     

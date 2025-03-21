@@ -1,2 +1,2 @@
 #run python script every day
-* */8 * * * /usr/local/bin/python /app/pynod/update.py > /proc/1/fd/1 2>/proc/1/fd/2
+0 */4 * * * /usr/local/bin/python /app/pynod/update.py > /proc/1/fd/1 2>/proc/1/fd/2

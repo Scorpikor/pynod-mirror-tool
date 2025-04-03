@@ -181,7 +181,7 @@ def update_ver_remove_categories(filepath, categories_to_remove):
                     out.write(line)
     shutil.move(filepath + ".out", filepath)
     if remove_flag !=0:
-        log(f"Файл  {filepath} был очищен от катекорий {categories_to_remove}", 3)
+        log(f"Файл  {filepath} был очищен от категорий {categories_to_remove}", 3)
     else:
         log(f"В файле {filepath} категории для очистки не найдены {categories_to_remove}", 3)
         

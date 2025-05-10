@@ -1,6 +1,14 @@
 # pynod-mirror-tool - Dockerized
 
 python mirror tool  to create local mirror nod32 antivirus bases
+pynod-mirror-tool  - скрипт, написанный на Рython для создания зеркала баз антивируса ESET NOD32. Поддерживаются операционные системы Windows, Linux, FreeBSD, для работы требуется Python 3.x версии.
+
+Установка:
+1) cd pynod-mirror-tool
+2) pip install -r requiments.txt
+3) Редактируем файл nod32ms.conf под себя
+4) запуск скачивания баз python3 update.py
+5) Для раздачи баз антивирусам рекомендуется использовать NGINX, конфиг которого лежит тут же (файл nginx)
 
 Быстрый запуск: docker compose up -d
 

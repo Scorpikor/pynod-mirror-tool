@@ -83,6 +83,13 @@ def user_agent (ver):
         )
         return random.choice(bzz)
     
+    if ver == 'ep5':
+        bzz =(
+        'EEA Update (Windows; U; 64bit; BPC 5.0.2060.0; OS: 10.0.26100 SP 0.0 NT;',
+        'EEA Update (Windows; U; 64bit; BPC 5.0.2062.0; OS: 6.2.9200 SP 0.0 NT;'
+        )
+        return random.choice(bzz)
+    
     if ver == 'ep6':
         bzz =(
         'EEA Update (Windows; U; 64bit; BPC 6.0.2060.0; OS: 10.0.26100 SP 0.0 NT;',

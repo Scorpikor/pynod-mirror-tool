@@ -15,23 +15,29 @@ from inc.log import *
 from inc.web import *
 
 if __name__ == "__main__":
-    print("\n"*3)
+    print("\n"*2)
     start_time = time.time()                                                    # Время запуска скрипта
     error_trigger = 0                                                           # Флаг ошибки
     error_text = []                                                             # Причины ошибок
     downloaded_size_all = 0                                                     # Счетчик сетевого трафика
     downloaded_files_all = 0                                                    # Счетчик скачанных файлов
     current_directory = os.path.dirname(os.path.abspath(__file__))              # Путь, из которого запускается update.py
-    log("Текущая папка " + str(current_directory),2)
+
     os_platform,os_separator = os_dir_separator()                               # Определяем платформу запуска и резделитель папок платформы
+    log(f"Запущен скрипт {script_version(current_directory + os_separator)}",1)
     config = configparser.ConfigParser()
-    config.read(current_directory + os_separator +'nod32ms.conf',encoding='utf-8')
-    versions_to_update = parser_config_versions_to_update(current_directory + os_separator + 'nod32ms.conf')  # список версий баз антивируса для обновления
+    config.read(current_directory + os_separator +'nod32ms.conf',encoding='utf-8')      # Считываем файл конфигурации nod32ms.conf
+    versions_to_update = parser_config_versions_to_update(current_directory + os_separator + 'nod32ms.conf')  # список версий антивируса для обновления баз
     official_servers_update = int(config.get('CONNECTION','official_servers_update'))
-    mirror_connect_retries = int(config.get('CONNECTION','mirror_connect_retries'))        # Kол-во попыток скачать файл
+    mirror_connect_retries = int(config.get('CONNECTION','mirror_connect_retries'))     # Kол-во попыток скачать файл
     max_workers = int(config.get('CONNECTION','max_workers'))                   # Кол-во потоков загрузки баз
+    protoscan_v3_patch = int(config.get('PATCH','protoscan_v3_patch'))          # Триггер применения патча protoscan_v3_patch
     web_page_data = []                                                          # Для формирования WEB страницы отчета
-    #
+    
+    
+    log(f"Используем платформу {os_platform}",3)
+    log(f"Текущая папка {current_directory}",5)
+    # Формируем путь web_server_root в зависимости от платформы (ОС)
     if os_platform == 'Linux':
         web_server_root = str(config.get('SCRIPT','linux_web_dir'))             # Путь к корню веб сервера, где будем хранить базы
     elif os_platform == 'Windows':
@@ -43,30 +49,39 @@ if __name__ == "__main__":
         log("Завершение работы скрипта....",4)
         sys.exit(1)
                                        
-    prefix_config = os_separator + config.get('ESET','prefix')                                             # Имя папки, в которую складывать базы разных версий в корне веб сервера
+    prefix_config = os_separator + config.get('ESET','prefix')                  # Имя папки, в которую складывать базы разных версий в корне веб сервера
     server_user = str(config.get('CONNECTION','mirror_user'))
     server_password = str(config.get('CONNECTION','mirror_password'))
     server_timeout = int(config.get('CONNECTION','mirror_timeout'))
     
-    # Выбор конфига init в соответствии с типом сервера
+    # Выбор конфига init в соответствии с типом сервера, с которого обновляемся
     if official_servers_update == 1:
         from inc.init_official import *
-        log("Режим обновления с официальных серверов (init_official.py)",1)
+        log("Режим обновления с официальных серверов (конфиг init_official.py)",1)
         oficial_servers = [value for key, value in config.items('OFFICIAL_SERVERS') if key.startswith('mirror')]
-        mirror, avg_time = choosing_the_best_server(oficial_servers)
-        log("Выбран лучший официальный сервер для обновлений: " + str(mirror)+ " " + str(avg_time) +" ms",2)
-        mirror_server ="http://" + str(mirror)        
+        # random
+        random_version = random.choice(versions_to_update)
+        file_get = init(random_version)['upd']
+        random_useragent = user_agent(random_version)
+        
+        
+        mirror, avg_time = choosing_the_best_server(oficial_servers, random_version, file_get, random_useragent )            # Выбор лучшего официального сервера для обновлений
+        log("Выбран лучший официальный сервер для обновлений: " + str(mirror)+ " " + str(avg_time) +" ms",2)        
+        mirror_server = f"http://{mirror}"
+        #sys.exit(1)
     else:
         from inc.init import *
-        log("Режим обновления с неофициальных зеркал (init.py)",1)
-        mirror_server = str(config.get('CONNECTION','mirror'))                       # Сервер обновлений баз из конфига
-        log("Сервер, с которого будем обновляться: " + mirror_server,2)
+        log("Режим обновления с неофициальных зеркал (конфиг init.py)",1)
+        mirror_server = str(config.get('CONNECTION','mirror'))                  # Сервер обновлений баз из конфига
+        log(f"Сервер, с которого будем обновляться: {mirror_server}",2)
         
+    print("\n")
     for version in versions_to_update:
         downloaded_size_version = 0                                             # Счетчик сетевого трафика для текущей версии
         downloaded_files_version = 0                                            # Счетчик скачанных файлов для текущей версии
         
         connect_dict = {
+        'official_servers_update': official_servers_update,
         'os_separator': os_separator,
         'current_directory': current_directory,
         'mirror_server':mirror_server,
@@ -78,6 +93,7 @@ if __name__ == "__main__":
         'init_environment': init(version),
         'web_server_root': web_server_root,
         'prefix_config': prefix_config,
+        'protoscan_v3_patch': protoscan_v3_patch,
         }
         
         result_dict = download_av_base_version (version, connect_dict)
@@ -98,8 +114,8 @@ if __name__ == "__main__":
         
         status_text = ""
         if result_dict['error'] != None:            
-            log(f"Ошибка скачивания баз версии [{version}]" ,4)
-            log(f"Причина: {result_dict['error_text']}" ,4)
+            log(f"[{version}] Ошибка скачивания баз версии" ,4)
+            log(f"[{version}] Причина: {result_dict['error_text']}" ,4)
             error_trigger = 1                                                      # устанавливаем триггер ошибки
             # срезаем длинный текст ошибки
             error_string = result_dict['error_text']

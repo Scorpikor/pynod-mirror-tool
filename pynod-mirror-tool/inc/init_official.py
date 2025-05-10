@@ -97,6 +97,14 @@ def init(ver):
         'name' : 'ESET NOD32 Ver. 17 - 18'
         }
 
+    if ver == 'ep5':
+        return {
+        'fix': '/dll',                                  # Добавочный путь
+        'upd' : 'eset_upd/ep5/dll/update.ver',        # Путь, по которому сам ep5 запрашивает update.ver с сервера обновлений
+        'dll' : 'eset_upd/ep5/dll/update.ver',        # Путь, по которому будет лежать update.ver у нас на зеркале
+        'name' : 'ESET NOD32 Endpoint Ver. 5'           # Описание
+        }   
+
     if ver == 'ep6':
         return {
         'fix': '/dll',                                  # Добавочный путь

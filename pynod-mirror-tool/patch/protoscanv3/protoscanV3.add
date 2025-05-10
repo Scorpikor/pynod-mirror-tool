@@ -1,0 +1,28 @@
+[PROTOSCAN0]
+version=1396 (20200505)
+versionid=1396
+build=1563
+type=protoscan
+category=engine
+level=0
+base=268435456
+date=05.05.2020
+platform=x86
+group=protoscan,netprot
+buildregname="ProtoscanBuild"
+file=/patch/em019_32_l0.nup
+size=678141
+[PROTOSCAN1]
+version=1400.4 (20200818)
+versionid=1400
+build=1575
+type=protoscan
+category=engine
+level=1
+base=1563
+date=18.08.2020
+platform=x86
+group=protoscan,netprot
+buildregname="ProtoscanBuild"
+file=/patch/em019_32_l1.nup
+size=54798

@@ -3,7 +3,7 @@
 # актуальную версию которого можно скачть по адресу:
 # https://github.com/Scorpikor/pynod-mirror-tool
 
-
+import re
 import platform
 import requests
 from tqdm import tqdm
@@ -20,14 +20,19 @@ import threading
 from requests.exceptions import HTTPError
 # ==========================
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from ping3 import ping,verbose_ping
+from functools import partial
+#from ping3 import ping,verbose_ping                     # import from ping3
 
     
 def tools_download_file(session,download_dict):
+    # ----------------------------------------------------------------------------
     # Скачиваем файл, возвращаем error, error_text, downloaded_size, path_to_save
-    downloaded_size = 0                                                     # счетчик 
-    error = None                                                            # Маркер ошибки скачивания
-    error_text = ""                                                         # Текст ошибки
+    # Error = None - нет ошибок
+    # ----------------------------------------------------------------------------                          
+    downloaded_size = 0                                                     # счетчик скачанных байт 
+    error = None                                                            # маркер ошибки скачивания
+    error_text = ""                                                         # текст ошибки
+    #version = download_dict['version']                                     # версия антивируса, для которой скачивается файл                                                                                                                                                                 
     mirror_connect_retries = download_dict['mirror_connect_retries']        # кол-во попыток перекачать файл
     log("tools.py:tools_download_file",5)
     
@@ -70,17 +75,29 @@ def tools_download_file(session,download_dict):
             
     # Если файл не существует или его размер отличается, выполняем загрузку
     try:
+        response = None
         response = session.get(url, headers=headers, auth=auth1, stream=True, timeout=server_timeout)
         response.raise_for_status()
-        
+    
+    except requests.exceptions.ConnectTimeout as e:
+        error = 1
+        error_text = f"Ошибка подключения: {str(e)}"
+        log(f"tools.py:tools_download_file: Ошибка подключения к серверу. Файл {url}", 5)
+        log(str(e), 5)
+        return error, error_text, downloaded_size, path_to_save
+    
     except Exception as e:
         error = 1
         error_text = str(e)
         # =======================================================
         log(f"tools.py:tools_download_file: Ошибка соеднинения с сервером. Файл {url}",5)        
         log (str(e),5)
+        if response.status_code == 401:
+            error = "401"
+            error_text = "401 Ошибка авторизации! Проверьте данные авторизации (логин/пароль) в файле конфигурации!"
+            log(f"tools.py:tools_download_file: {error_text} {url}",5)                
         return error, error_text, downloaded_size, path_to_save
-        #sys.exit(1)
+
         
     log(f"tools.py:tools_download_file: Запрос к серверу - 1: {str(response.request.headers)}",5)
     log(f"tools.py:tools_download_file: Ответ от сервера - 1: {str(response.headers)}",5)
@@ -172,7 +189,8 @@ def update_ver_remove_categories(filepath, categories_to_remove):
                 stripped_line = line.strip()
                 # Проверяем, начинается ли новая категория
                 if stripped_line.startswith("[") and stripped_line.endswith("]"):
-                    inside_removed_category = stripped_line in categories_to_remove
+                    inside_removed_category = any(re.match(pattern, stripped_line) for pattern in categories_to_remove)
+                    #inside_removed_category = stripped_line in categories_to_remove
                     if inside_removed_category:
                         remove_flag = 1
 
@@ -181,11 +199,21 @@ def update_ver_remove_categories(filepath, categories_to_remove):
                     out.write(line)
     shutil.move(filepath + ".out", filepath)
     if remove_flag !=0:
-        log(f"Файл  {filepath} был очищен от категорий {categories_to_remove}", 3)
+        log(f"Файл {filepath} был очищен от категорий {categories_to_remove}", 3)
     else:
         log(f"В файле {filepath} категории для очистки не найдены {categories_to_remove}", 3)
         
+def script_version(path):
+    txt =""
+    filepath = f"{path}version"
+    try:
+        with open(filepath, 'r') as file:
+            txt = file.readline().rstrip('\n')
+
+    except:
+        txt = None
     
+    return txt
     
 def move_cursor_to(x, y):
     # Функция для перемещения курсора в указанное место
@@ -290,24 +318,29 @@ def download_files_concurrently(download_dict, files_to_download):
                             downloaded_size_version_result += downloaded_size
                             downloaded_files_version_result += 1
                     else:
-                        # Если ошибка, увеличиваем счётчик попыток
-                        retries_all += 1
-                        retry_count[file_path] = retry_count.get(file_path, 0) + 1
-                        log(f"tools.prepare_and_download : Ошибка скачивания файла: {file_path}. Добавляем в очередь для повторной попытки.  ",5)
-                        if retry_count[file_path] <= max_retries and not stop_downloading:
-                            # Добавляем задачу в начало очереди
-                            task_queue.appendleft((file_path, file_size))
+                        if err != "401":
+                            # Если ошибка, увеличиваем счётчик попыток
+                            retries_all += 1
+                            retry_count[file_path] = retry_count.get(file_path, 0) + 1
+                            log(f"tools.prepare_and_download : Ошибка скачивания файла: {file_path}. Добавляем в очередь для повторной попытки.  ",5)
+                            if retry_count[file_path] <= max_retries and not stop_downloading:
+                                # Добавляем задачу в начало очереди
+                                task_queue.appendleft((file_path, file_size))
+                            else:
+                                # Лимит попыток достигнут, останавливаем загрузку
+                                log(f"tools.prepare_and_download : Ошибка скачивания файла: {file_path}. Кол-во поыток скачать файл закончилось...",5)
+                                error = 1
+                                error_text += f"Ошибка: {file_path.split('/')[-1]} пропущен после {max_retries} попыток. {err_text}\n"
+                                stop_downloading = True  # Устанавливаем флаг остановки
+                                #executor.shutdown(wait=False)
+                                #futures.clear()
+                                #task_queue.clear()
+                                #cancel_event.set()  # Устанавливаем событие для остановки всех задач
+                                break  # Прерываем цикл обработки задач
                         else:
-                            # Лимит попыток достигнут, останавливаем загрузку
-                            log(f"tools.prepare_and_download : Ошибка скачивания файла: {file_path}. Кол-во поыток скачать файл закончилось...",5)
-                            error = 1
-                            error_text += f"Ошибка: {file_path.split('/')[-1]} пропущен после {max_retries} попыток. {err_text}\n"
+                            error = err
+                            error_text += f"Ошибка: {file_path.split('/')[-1]} {err_text}\n"
                             stop_downloading = True  # Устанавливаем флаг остановки
-                            #executor.shutdown(wait=False)
-                            #futures.clear()
-                            #task_queue.clear()
-                            #cancel_event.set()  # Устанавливаем событие для остановки всех задач
-                            break  # Прерываем цикл обработки задач
 
                     # Обновляем прогресс-бар
                     pbar.update(1)
@@ -322,12 +355,19 @@ def download_files_concurrently(download_dict, files_to_download):
     # new_files                         - список сохраненных файлов в хранилище
     return error, error_text, downloaded_size_version_result, downloaded_files_version_result, retries_all, new_files
     
-def move_file(source_path, destination_path):
+def move_file(source_path, destination_path, mode='move'):
     # Перемещаем файл
-    log("tools.py:move_file",5)
+    log(f"tools.py:move_file режим {mode} из {source_path} в {destination_path}",5)
     os.makedirs(os.path.dirname(destination_path), exist_ok=True)
-    shutil.move(source_path, destination_path)
-    log("Файл перемещён в " + str(destination_path),5)
+    if mode == 'move':
+        shutil.move(source_path, destination_path)
+        log(f"Файл перемещён в {destination_path}",5)
+    elif mode == 'copy':
+        shutil.copy(source_path, destination_path)
+        log(f"tools.py:move_file Файл скопирован в {destination_path}",5)
+    else:
+        log(f"tools.py:move_file Неправильный режим! {mode}",4)
+    
     
 def modify_update_ver(updatever_file_path, prefix):
     # Функция модифицирует в update.ver параметр file, добавляя префикс
@@ -442,7 +482,7 @@ def ping_server(server, attempts=3):
     # Пингует сервер и возвращает среднее время отклика
     times = []
     for _ in range(attempts):
-        result = ping(server, timeout=2, unit='ms')  # Вызываем ping с таймаутом
+        result = ping(server, timeout=1, unit='ms')  # Вызываем ping с таймаутом
         if result != None and result != 0 and result != False:  # Если ответ не пустой
             times.append(result)  # Добавляем результат в список
             
@@ -452,13 +492,57 @@ def ping_server(server, attempts=3):
         return server, avg_time
     else:
         return server, None  # Если сервер не ответил ни разу
-        
-def choosing_the_best_server(oficial_servers):
+
+
+def request_ping_server(server, random_version, file_get, random_useragent, timeout=2, attempts=1):
+    # Альтернативный способ проверки работоспособности официальных серверов для обновления
+    times = []
+    server_url = f'http://{server}/{file_get}'
+    headers = {"User-Agent": random_useragent}
+    
+    for _ in range(attempts):
+        response = None
+        start = time.time()
+        try:                       
+            response = requests.get(server_url,headers=headers, timeout=timeout)
+            response.raise_for_status()        
+            latency = (time.time() - start) * 1000
+            #log(f'try {server} {latency} sc:{response.status_code}',5)
+                        
+        except requests.RequestException as e:            
+            if response != None and response.status_code in (200,401,403):
+                latency = (time.time() - start) * 1000
+                #log(f'except {server} {latency} sc:{response.status_code}',5)
+                
+            else:                
+                log(f'{server} Error: {e.__class__.__name__} | {e}', 5)
+                return server,None
+                               
+        times.append(latency)
+    if times:
+        log(f'try {server} {times}',5)
+        avg_time = sum(times)/len(times)
+        return server, avg_time
+    else:
+        return server, None
+
+    
+def choosing_the_best_server(oficial_servers, random_version, file_get, random_useragent, mode='pong'):
     # Выбираем лучший официальный сервер для обновления
     log("Выбираем лучший официальный сервер для обновлений...",1)
+    
     results = []
+    if mode == 'ping':        
+        log("tools.py:choosing_the_best_server: mode = ping3",5)
+        pinger = ping_server
+    else:
+        # Режим проверки официальных серверов через request
+        log("tools.py:choosing_the_best_server: mode = request",5)
+        log(f'Для проверки представляемся как антивирус {random_version}',5)
+        pinger = partial(request_ping_server, random_version=random_version, file_get=file_get, random_useragent=random_useragent)        
+        
     with ThreadPoolExecutor(max_workers=len(oficial_servers)) as executor:
-        future_to_server = {executor.submit(ping_server, server): server for server in oficial_servers}
+        future_to_server = {executor.submit(pinger, server): server for server in oficial_servers}
         for future in as_completed(future_to_server):
             server = future_to_server[future]
             try:
@@ -492,13 +576,13 @@ def choosing_the_best_server(oficial_servers):
 def os_dir_separator():
     os_platform = platform.system()
     if os_platform == "Linux":
-        log("tools.py:os_dir_separator: Используем платформу Linux",2)
+        log("tools.py:os_dir_separator: Используем платформу Linux",5)
         return os_platform, "/"
     elif os_platform == "Windows":
-        log("tools.py:os_dir_separator: Используем платформу Windows",2)
+        log("tools.py:os_dir_separator: Используем платформу Windows",5)
         return os_platform, "\\"
     elif os_platform == "FreeBSD":
-        log("tools.py:os_dir_separator: Используем платформу FreeBSD",2)
+        log("tools.py:os_dir_separator: Используем платформу FreeBSD",5)
         return os_platform, "/"
     else:
         log("tools.py:choosing_the_best_server: Платформа, на которой запущен скрипт, не тестировалась!",4)
@@ -507,13 +591,21 @@ def os_dir_separator():
         sys.exit(1)
         
         
-def init_filepath_fix(osseparator,filepath):
+def init_filepath_fix(os_separator,filepath):
     # фиксим путь в соответствии с ОС
-    return filepath.replace('/', osseparator)
+    return filepath.replace('/', os_separator)
     
 def error_text_fix(text):
     # Удаляем потенциально опасные символы, из-за которых может не отправиться сообщение в телеграм
     text = text.translate(str.maketrans({"<": "", ">": "", "'": "", '"': ""}))
     return text
     
-    
+def append_file_to_another(src, dst):
+    # читаем из файла src и добавляем в конец файла dst
+    try:
+        with open(src, 'rb') as file1, open(dst, 'ab') as file2:
+            # Чтение из первого файла и запись в конец второго
+            file2.write(file1.read())
+        log(f"Содержимое '{src}' добавлено в конец '{dst}'",5)
+    except Exception as e:
+        log(f"tools.py:append_file_to_another: Ошибка при копировании: {e}",4)

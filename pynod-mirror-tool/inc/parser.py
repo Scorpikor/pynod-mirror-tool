@@ -42,7 +42,8 @@ def parser_update_ver(updatever_file_path):
 def parser_get_DB_version(updatever_file):
     # узнаем версию баз в update.ver
     log("parser.py:get_DB_version",5)
-    max = 0
+    max_value = 0
+    test_file = None                   # файл, который будем использовать для проверки авторизации
     if os.path.exists(updatever_file):
     
         config = configparser.ConfigParser()    
@@ -55,12 +56,24 @@ def parser_get_DB_version(updatever_file):
         for section in sections:
             try:
                 upd = config.get(section,'version').split()[0]
-                if upd and float(upd) > max:
-                    max = float(upd)
+                if upd and float(upd) > max_value:
+                    max_value = float(upd)
+                    
+                    
             except:
                 log("parser.py:get_DB_version: Пропуск секции т.к. не содержит строку version",5)
-        
-    return max
+                
+            # Выбираем тестовый файл для скачивания
+            if not test_file:
+                try:
+                    #if 'perseus' in config.get(section,'group'):
+                    if 'horus' in config.get(section,'group'):
+                        test_file = config.get(section,'file')
+                        log(f"parser.py:parser_get_DB_version: file = {horus_file}",3)
+                except:
+                        log("parser.py:get_DB_version: Пропуск секции т.к группа horus не содержит строку file",5)
+                
+    return max_value, test_file
     
 
     

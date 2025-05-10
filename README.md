@@ -2,7 +2,7 @@
 
 python mirror tool  to create local mirror nod32 antivirus bases
 
-pynod-mirror-tool  - скрипт, написанный на Рython для создания зеркала баз антивируса ESET NOD32. Поддерживаются операционные системы Windows, Linux, FreeBSD, для работы требуется Python 3.x версии.
+pynod-mirror-tool  - скрипт, написанный на Рython для создания зеркала баз антивируса ESET NOD32. Поддерживаются операционные системы Windows, Linux, FreeBSD, для работы требуется Python 3.x версии и NGINX для раздачи баз антивирусам.
 
 # Установка:
 1) cd pynod-mirror-tool

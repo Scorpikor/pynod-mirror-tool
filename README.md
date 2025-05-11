@@ -1,4 +1,9 @@
 # pynod-mirror-tool - Dockerized
+ ![Version](https://img.shields.io/badge/version-20250509-gold)
+ ![Last commit](https://img.shields.io/github/last-commit/Scorpikor/pynod-mirror-tool/main?cacheSeconds=0)
+[![Opened issues](https://img.shields.io/github/issues/Scorpikor/pynod-mirror-tool?color=darkred)](https://github.com/rzc0d3r/ESET-KeyGen/issues?cacheSeconds=0)
+[![Closed issues](https://img.shields.io/github/issues-closed/Scorpikor/pynod-mirror-tool?color=darkgreen&cacheSeconds=0)](https://github.com/rzc0d3r/ESET-KeyGen/issues?q=is%3Aissue+is%3Aclosed)
+![License](https://img.shields.io/github/license/Scorpikor/pynod-mirror-tool)
 
 python mirror tool  to create local mirror nod32 antivirus bases
 

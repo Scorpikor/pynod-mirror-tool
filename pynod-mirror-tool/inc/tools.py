@@ -79,7 +79,7 @@ def tools_download_file(session,download_dict):
         response = session.get(url, headers=headers, auth=auth1, stream=True, timeout=server_timeout)
         response.raise_for_status()
     
-    except requests.exceptions.ConnectTimeout as e:
+    except requests.exceptions.RequestException as e:
         error = 1
         error_text = f"Ошибка подключения: {str(e)}"
         log(f"tools.py:tools_download_file: Ошибка подключения к серверу. Файл {url}", 5)

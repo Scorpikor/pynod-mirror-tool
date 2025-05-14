@@ -66,12 +66,12 @@ def parser_get_DB_version(updatever_file):
             # Выбираем тестовый файл для скачивания
             if not test_file:
                 try:
-                    #if 'perseus' in config.get(section,'group'):
+                    #if 'perseus' in config.get(section,'group'):                    
                     if 'horus' in config.get(section,'group'):
                         test_file = config.get(section,'file')
-                        log(f"parser.py:parser_get_DB_version: file = {horus_file}",3)
+                        log(f"parser.py:parser_get_DB_version: Выбран тестовый файл: {test_file}",5)
                 except:
-                        log("parser.py:get_DB_version: Пропуск секции т.к группа horus не содержит строку file",5)
+                        log("parser.py:get_DB_version: Не нашли тестовый файл для проверки ключа",5)
                 
     return max_value, test_file
     

@@ -417,26 +417,21 @@ def sizeof_fmt(num):
 def convert_seconds(seconds):
     # Переводим секунды в удобный формат
     log("tools.py:convert_seconds",5)
-    days = seconds // (24 * 3600)
-    seconds %= (24 * 3600)
-    hours = seconds // 3600
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60  # Здесь остаются секунды, включая дробные
-    
-    result = []
-    if days > 0:
-        result.append(f"{days} дн.")
-    if hours > 0:
-        result.append(f"{hours} ч.")
-    if minutes > 0:
-        result.append(f"{minutes} мин.")
-    
-    # Используем точность до двух знаков для секунд
-    if seconds > 0 or not result:
-        result.append(f"{seconds:.2f} сек.")
-    
-    return " ".join(result)
+    td = datetime.timedelta(seconds=seconds)
+
+    p = str(td).partition('.')
+    if p[2]:
+        s = ''.join([p[0], p[1], p[2][0:2]]) # Используем точность до двух знаков для секунд
+    else:
+        s = p[0]
+
+    p = s.partition(' days,')
+    if not p[1]:
+        p = s.partition(' day,')
+    if p[1]:
+        s = ''.join([p[0], 'д', p[2]])
+
+    return s
     
 def list_files_and_folders(directory):
     # Возвращаем список файлов и папок в директории

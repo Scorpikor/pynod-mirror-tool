@@ -132,17 +132,14 @@ if __name__ == "__main__":
         else:
             status_text = ""
             
-            status_text += f"✅ [{version}] {result_dict['base_version']}\n"+\
-                           f"Последнее обновление : {upd_ver_creation_datetime}\n"+\
-                           f"Последняя проверка   : {update_date}\n"+\
-                           f"Файлов в базе версии : {result_dict['full_number_of_files_dir']}\n"+\
-                           f"Размер базы          : {sizeof_fmt(result_dict['full_size_dir'])}\n"
+            status_text += f"✅ [{version}] {result_dict['base_version']:g}\n"+\
+                           f"Обновление : {upd_ver_creation_datetime}\n"+\
+                           f"Размер базы: {sizeof_fmt(result_dict['full_size_dir'])} / {result_dict['full_number_of_files_dir']}ф\n"
                        
             if result_dict['retries_all'] != 0:
-                status_text += f"Повторных загрузок   : {result_dict['retries_all']} ⚠️\n"
+                status_text += f"           : ⚠️{result_dict['retries_all']} перезагрузок\n"
             
-            status_text += f"Скачали              : {sizeof_fmt(result_dict['downloaded_size_versionown'])}\n"
-            status_text += f"Скачали файлов       : {result_dict['downloaded_files_version']}\n"
+            status_text += f"Скачали    : {sizeof_fmt(result_dict['downloaded_size_versionown'])} / {result_dict['downloaded_files_version']}ф\n"
             
             #status_text += "</code>"    
                 
@@ -217,11 +214,10 @@ if __name__ == "__main__":
         for txt in error_text:
             info +=f"{txt}\n"
                 
-        info += '<code>'+'-'*36 + "\n"
-        info += f"Всего скачано файлов        : {downloaded_files_all}\n"
-        info += f"Размер всех скачанных файлов: {sizeof_fmt(downloaded_size_all)}\n"
-        info += f"Полный размер всех баз      : {sizeof_fmt(full_base_size)}\n"
-        info += f"Время выполнения скрипта    : {end_time}\n"
+        info += '<code>'+'-'*34 + "\n"
+        info += f"Всего скачанно: {sizeof_fmt(downloaded_size_all)} / {downloaded_files_all}ф\n"
+        info += f"Размер баз    : {sizeof_fmt(full_base_size)}\n"
+        info += f"Скрипт работал: {end_time}\n"
         info += "</code>\n"
         
         

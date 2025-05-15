@@ -7,8 +7,8 @@ map $http_user_agent $ver {
 
 server {
 
-        listen [::]:80;
-        listen      80;
+        #listen [::]:80;
+        listen      22221;		# ПОРТ
         root /var/www/nod32mirror;	# НАСТРОИТЬ ПОД СВОЙ СЕРВЕР
         server_name _;
         index index.html;

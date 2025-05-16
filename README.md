@@ -12,10 +12,11 @@ pynod-mirror-tool  - скрипт, написанный на Рython для со
 
 # Установка:
 1) cd pynod-mirror-tool
-2) pip install -r requiments.txt
-3) Редактируем файл nod32ms.conf под себя
-4) запуск скачивания баз python3 update.py
-5) Для раздачи баз антивирусам рекомендуется использовать NGINX, конфиг которого лежит тут же (папка nginx-configs, подбираем под свою версию nginx)
+2) apt install pip3
+3) pip3 install -r requiments.txt
+4) Редактируем файл nod32ms.conf под себя
+5) запуск скачивания баз python3 update.py
+6) Для раздачи баз антивирусам рекомендуется использовать NGINX, конфиг которого лежит тут же (папка nginx-configs, подбираем под свою версию nginx)
 
 
 Быстрый запуск в docker: docker compose up -d

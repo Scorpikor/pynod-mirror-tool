@@ -75,7 +75,7 @@ if __name__ == "__main__":
         mirror_server = str(config.get('CONNECTION','mirror'))                  # Сервер обновлений баз из конфига
         log(f"Сервер, с которого будем обновляться: {mirror_server}",2)
         
-    print("\n")
+    log(f"\n",1)
     for version in versions_to_update:
         downloaded_size_version = 0                                             # Счетчик сетевого трафика для текущей версии
         downloaded_files_version = 0                                            # Счетчик скачанных файлов для текущей версии
@@ -171,19 +171,18 @@ if __name__ == "__main__":
         log(f"Кол-во файлов в папке баз   [{version}]: {result_dict['full_number_of_files_dir']}" ,2)
         log(f"Размер папки с базами       [{version}]: {sizeof_fmt(result_dict['full_size_dir'])}" ,2)
         log(f"{'-'*50}",2)                
-        print("\n"*3)
-        
+        log(f"{'\n'*3}",1)
 
 
         
     end_time = str(convert_seconds(time.time() - start_time))
     full_base_size = (folder_size(web_server_root + prefix_config))
-    log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
+    log("-"*70,2)
     log(f"Всего скачано файлов        : {downloaded_files_all}",2)
     log(f"Размер всех скачанных файлов: {sizeof_fmt(downloaded_size_all)}",2)
     log(f"Полный размер всех баз {web_server_root + prefix_config} : {sizeof_fmt(full_base_size)}",2)
     log(f"Время выполнения скрипта: {end_time}" ,2)
-    log(TColor.CYAN +"-"*70 + TColor.ENDC,2)
+    log("-"*70,2)
     print()
     web_page_data.append([0,"","","","","","","","","Скачано всего, файлов",str(downloaded_files_all)])
     web_page_data.append([0,"","","","","","","","","Скачано всего, размер",str(sizeof_fmt(result_dict['downloaded_size_versionown']))])
@@ -224,5 +223,7 @@ if __name__ == "__main__":
         t_msg = f"<code>{msg_prefix} {update_date}\n[Сервер: {platform.node()}]\n{text}\n{info}</code>"
         log(f"Кол-во символов в сообщении Telegram : {len(t_msg)}",3)
         send_msg(t_msg, token, chat_id)
-        
+    
+    # Закрываем лог файл
+    close_log()    
     

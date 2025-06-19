@@ -75,7 +75,7 @@ if __name__ == "__main__":
         mirror_server = str(config.get('CONNECTION','mirror'))                  # Сервер обновлений баз из конфига
         log(f"Сервер, с которого будем обновляться: {mirror_server}",2)
         
-    log(f"\n",1)
+    log("\n",1)
     for version in versions_to_update:
         downloaded_size_version = 0                                             # Счетчик сетевого трафика для текущей версии
         downloaded_files_version = 0                                            # Счетчик скачанных файлов для текущей версии
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         downloaded_files_all += result_dict['downloaded_files_version']
         downloaded_size_all += result_dict['downloaded_size_versionown']
         
-        log(f"{'-'*50}",2)
+        log("-"*50,2)
         log(f"Скачано файлов для базы текущей версии : {result_dict['downloaded_files_version']}",2)
         log(f"Размер скачанных файлов текущей версии : {sizeof_fmt(result_dict['downloaded_size_versionown'])}",2 )
         log(f"Кол-во старых файлов базы удалено      : {result_dict['trash_files_deleted']}",2 )
@@ -170,8 +170,8 @@ if __name__ == "__main__":
         log(f"Время скачивания баз версии [{version}]: {result_dict['update_time']}" ,2)
         log(f"Кол-во файлов в папке баз   [{version}]: {result_dict['full_number_of_files_dir']}" ,2)
         log(f"Размер папки с базами       [{version}]: {sizeof_fmt(result_dict['full_size_dir'])}" ,2)
-        log(f"{'-'*50}",2)                
-        log(f"{'\n'*3}",1)
+        log("-"*50,2)                
+        log("\n"*3,1)
 
 
         

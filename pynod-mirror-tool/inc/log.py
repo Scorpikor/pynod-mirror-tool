@@ -67,7 +67,7 @@ def trim_log_file_tail(path, max_bytes=1024*1024):
 def close_log():
     if generate_log_file == 1:
         trim_log_file_tail(log_file_path, max_bytes=log_file_size*1024)
-        log_file.writelines(f"\n"*5)
+        log_file.writelines("\n"*5)
         log_file.close()
 
         

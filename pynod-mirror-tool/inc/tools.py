@@ -14,7 +14,7 @@ import datetime
 from inc.log import *
 from collections import deque
 import threading
-
+import stat
 
 #from http import HTTPStatus
 from requests.exceptions import HTTPError
@@ -32,7 +32,7 @@ def tools_download_file(session,download_dict):
     downloaded_size = 0                                                     # счетчик скачанных байт 
     error = None                                                            # маркер ошибки скачивания
     error_text = ""                                                         # текст ошибки
-    #version = download_dict['version']                                     # версия антивируса, для которой скачивается файл                                                                                                                                                                 
+    mode_one_dir_base = download_dict['mode_one_dir_base']                  # Если включен режим (=1), то будем менять пути сохранения файлов
     mirror_connect_retries = download_dict['mirror_connect_retries']        # кол-во попыток перекачать файл
     log("tools.py:tools_download_file",5)
     
@@ -48,7 +48,7 @@ def tools_download_file(session,download_dict):
     bar_color = download_dict['colour'] 
     log("tools.py:tools_download_file: Download URL: " + str(url),5)
     path_to_save = download_dict['save_path']                               # Путь для сохранения файла
-    log(f"tools.py:tools_download_file: SAVE PATH: {path_to_save}",5)  
+    #log(f"tools.py:tools_download_file: SAVE PATH: {path_to_save}",3)  
     server_timeout = download_dict['server_timeout']                        # Таймаут операций подключения
     # Добавляем авторизацию 
     if download_dict['server_user'] and download_dict['server_password']:
@@ -240,27 +240,43 @@ def pbar_colour(number):
 
 def download_files_concurrently(download_dict, files_to_download):
     # Параллельная загрузка файлов
-    new_files =[]                                   # Список новых файлов с путями, сохраненных в хранилище 
-    error = None                                    # Статус скачивания файлов общий
-    error_text = ""                                 # Текст ошибки
-    stop_downloading = False                        # Флаг остановки загрузки
-    retries_all = 0                                 # счетчик кол-ва попыток перекачать файл из-за каких-либо проблем
+    new_files =[]                                           # Список новых файлов с путями, сохраненных в хранилище 
+    error = None                                            # Статус скачивания файлов общий
+    error_text = ""                                         # Текст ошибки
+    stop_downloading = False                                # Флаг остановки загрузки
+    retries_all = 0                                         # счетчик кол-ва попыток перекачать файл из-за каких-либо проблем
     os_separator = download_dict['os_separator']
     version = download_dict['version']
-    desc = f"[{version}] Общий прогресс"            # сообщение индикатора выполнения
-    path_fix = download_dict['path_fix']            # корневая папка для хранения файлов баз в корне папки web сервера
+    desc = f"[{version}] Общий прогресс"                    # сообщение индикатора выполнения
+    mode_one_dir_base = download_dict['mode_one_dir_base']  # Если включен режим (=1), то будем менять пути сохранения файлов
+    path_fix = download_dict['path_fix']                    # корневая папка для хранения файлов баз в корне папки web сервера
 
     # Прогресс-бар
     pbar = tqdm(total=len(files_to_download), desc=desc, colour='cyan', ascii=True, unit="file")
 
     def prepare_and_download(session, base_url, file_path, file_size, os_separator, version, retry_count):
         # Подготовка словаря для скачивания каждого файла базы и вызов tools_download_file
-            
+        
+
+        #---------------------------
+        # Пересмотреть для чего
+        #---------------------------
         if not file_path.startswith("/"):               # фиксим путь, когда в update.ver файл не начинается с "/"
             file_path = f"{path_fix}/{file_path}"
-            
+        
+        
         file_url = f"{base_url}{file_path}"                                                 # url для скачивания файла
-        save_path = f"{download_dict['save_path']}{file_path.replace('/',os_separator)}"    # путь для сохранения файла   
+        
+        
+            
+        #Формируем путь для сохранения файлов
+        if mode_one_dir_base == 1:
+            # Если включен режим mode_one_dir_base, обрезаем все подпапки чтоб файлы ложились в одну папку 
+            save_path = f"{download_dict['save_path']}{os_separator}{file_path.split('/')[-1]}" # путь для сохранения файла
+            log(f"---------: МОД путь сохранения файла : {save_path}  ",5)
+        else:
+            # Обычный режим сохранения баз
+            save_path = f"{download_dict['save_path']}{file_path.replace('/',os_separator)}"    # путь для сохранения файла   
         
         download_file_dict = {
             'download_url': file_url,
@@ -272,7 +288,8 @@ def download_files_concurrently(download_dict, files_to_download):
             'server_timeout': download_dict['server_timeout'],
             'mirror_connect_retries': download_dict['mirror_connect_retries'],
             'file_size': file_size,
-            'text': f"[{version}] [{retry_count}] {file_path.split('/')[-1]}"  # Имя файла для отображения в tqdm
+            'text': f"[{version}] [{retry_count}] {file_path.split('/')[-1]}",  # Имя файла для отображения в tqdm
+            'mode_one_dir_base': mode_one_dir_base                              # Если включен режим (=1), то будем менять пути сохранения файлов
         }
         return tools_download_file(session, download_file_dict)
 
@@ -362,28 +379,29 @@ def move_file(source_path, destination_path, mode='move'):
     if mode == 'move':
         shutil.move(source_path, destination_path)
         log(f"Файл перемещён в {destination_path}",5)
+        
     elif mode == 'copy':
-        shutil.copy(source_path, destination_path)
+        shutil.copy(source_path, destination_path)        
         log(f"tools.py:move_file Файл скопирован в {destination_path}",5)
+        os.chmod(destination_path, 0o644)
+        log(f"Применены права к файлу 644 {destination_path}",3)
     else:
         log(f"tools.py:move_file Неправильный режим! {mode}",4)
     
     
-def modify_update_ver(updatever_file_path, prefix):
-    # Функция модифицирует в update.ver параметр file, добавляя префикс
-    # DEPRECATED
+def modify_update_ver(updatever_file_path):
+    # Функция модифицирует в update.ver параметр file
     log("tools.py:modify_update_ver",5)
-    log("UPDATE.VER prefix: " + str(prefix),5)
     with open(updatever_file_path, 'r') as file:
         lines = file.readlines()
         
     new_lines = []
     for line in lines:
         if line.startswith("file="):
+            # Модифицируем директиву file
             parts = line.split('=', 1)
-            if not parts[1].startswith("/"):
-                parts[1] = '/'+ parts[1]
-            modified_line = parts[0] + "=" + prefix + parts[1]
+            parts[1] = parts[1].split('/')[-1]            
+            modified_line = f"{parts[0]}={parts[1]}"
             new_lines.append(modified_line)
         else:
             new_lines.append(line)

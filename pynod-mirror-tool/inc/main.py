@@ -23,7 +23,8 @@ def download_av_base_version (version, connect_dict):
     connect_user_agent = user_agent(version)                                # Формируем строку с юзерагентом
     retries_all = 0                                                         # Счетчик. Общее кол-во попыток перекачать файл
     alien_DB_version = 0
-    our_DB_version = 0    
+    our_DB_version = 0
+    mode_one_dir_base = connect_dict['mode_one_dir_base']                   # Режим хранения баз антивируса "mode_one_dir_base"
     
     with requests.Session() as session:                                     # Создаём сессию
             retries = Retry(total=connect_dict['mirror_connect_retries'],
@@ -34,6 +35,8 @@ def download_av_base_version (version, connect_dict):
             init_environment = connect_dict['init_environment']             # Берем переменные для данной версии антивируса
             log(f"[{version}] Обновляем вериию: {init_environment['name']}",1 )             
             web_server_root = connect_dict['web_server_root']               # Путь к корню веб сервера, где будем хранить базы
+            
+            
             prefix_config = connect_dict['prefix_config']                   # Имя папки, в которую складывать базы разных версий в корне веб сервера
             add_path = ''                                                   # добавочный путь
             new_files_list = []                                             # Список файлов новой базы (нужен для отчистки от старых файлов)
@@ -41,7 +44,16 @@ def download_av_base_version (version, connect_dict):
             upd_ver_in_storage_path = f"{web_server_root}{os_separator}{init_filepath_fix(os_separator,init_environment['dll'])}"
             our_DB_version, _ = parser_get_DB_version(upd_ver_in_storage_path)
             log (f"[{version}] В хранилище update.ver версии : {our_DB_version} {upd_ver_in_storage_path}",1)
-            save_path = f"{connect_dict['web_server_root']}{prefix_config}{os_separator}{version}"    # Путь, по которому будем сохранять файлы базы без части из update.ver
+            
+            if connect_dict['mode_one_dir_base'] == 1:
+                # Включен режим сохранения баз в одну папку
+                # updatever_storage_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll'])}"
+                log (f"[{version}] Режим сохранения баз в одном каталоге",3)
+                save_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll']).rsplit('/', 1)[0]}"
+            else:
+                # Норамальный режим сохранения баз
+                save_path = f"{connect_dict['web_server_root']}{prefix_config}{os_separator}{version}"    # Путь, по которому будем сохранять файлы базы без части из update.ver
+            log(f"---- SAVE PATH main [{save_path}]",1 )                          # ----------------------------------------------------------------
             # ===================================
             # Этап 1. Скачиваем update.ver в tmp
             # ===================================
@@ -61,7 +73,8 @@ def download_av_base_version (version, connect_dict):
                 'server_user': connect_dict['server_user'],                                                                     # Логин для подключения к серверу
                 'server_password': connect_dict['server_password'],                                                             # Пароль для подключения к серверу
                 'server_timeout': connect_dict['server_timeout'],                                                               # Таймаут операций подключения
-                'mirror_connect_retries': connect_dict['mirror_connect_retries']                                                # Кол-во попытак скачать файл
+                'mirror_connect_retries': connect_dict['mirror_connect_retries'],                                               # Кол-во попытак скачать файл
+                'mode_one_dir_base': 0                                                                                          # 0 т.к. скачиваем в tmp
                 }
             
             # Ожидаем на выходе:
@@ -92,6 +105,7 @@ def download_av_base_version (version, connect_dict):
                     log("[" + str(version)+ "]" + " Требуется обновление баз",2)
                     
                     files_to_download = parser_update_ver(download_dict['save_path'])
+                    #print (files_to_download)
                     num_files_to_download = len(files_to_download)
                     log("[" + str(version)+ "]" + " Кол-во файлов в update.ver для загрузки: " + str(num_files_to_download) ,2)                    
                     file_counter = 0
@@ -112,7 +126,8 @@ def download_av_base_version (version, connect_dict):
                         'server_user': connect_dict['server_user'],                                                                     # Логин для подключения к серверу
                         'server_password': connect_dict['server_password'],                                                             # Пароль для подключения к серверу
                         'server_timeout': connect_dict['server_timeout'],                                                               # Таймаут операций подключения
-                        'mirror_connect_retries': connect_dict['mirror_connect_retries']                                                                    # Кол-во попытак скачать файл
+                        'mirror_connect_retries': connect_dict['mirror_connect_retries'],                                               # Кол-во попытак скачать файл
+                        'mode_one_dir_base': 0                                                                                          # 0 т.к. скачиваем в tmp
                         }                                               
                         
                         # Ожидаем на выходе:
@@ -120,7 +135,9 @@ def download_av_base_version (version, connect_dict):
                         error, error_text, downloaded_size_version_result, path_to_save = tools_download_file(session, download_dict)
                         
                         #print(error)
+                    #------------
                     #sys.exit(1)
+                    #------------
                     
             if error == None and our_DB_version < alien_DB_version:
                 downloaded_size_version += downloaded_size_version_result   # добавляем размер тестового файла к общему счетчику
@@ -140,6 +157,7 @@ def download_av_base_version (version, connect_dict):
                     'server_timeout': connect_dict['server_timeout'],            # таймаут операций скачивания
                     'mirror_connect_retries' : connect_dict['mirror_connect_retries'],     # кол-во попыток перекачать файл
                     'max_workers' : connect_dict['max_workers'],                 # кол-во потоков скачивания
+                    'mode_one_dir_base': mode_one_dir_base                       # Если включен режим (=1), то будем менять пути сохранения файлов 
                     }
                     
                 
@@ -184,7 +202,11 @@ def download_av_base_version (version, connect_dict):
                             # Копируем файлы в хранилище баз     
                             for file in file_names:                                
                                 from_file = f"{patch_dir}{os_separator}{file}"
-                                to_file = f"{save_path}{os_separator}patch{os_separator}{file}"
+                                if connect_dict['mode_one_dir_base'] == 1:
+                                    # Правим путь в режиме mode_one_dir_base
+                                    to_file = f"{save_path}{os_separator}{file}"
+                                else:
+                                    to_file = f"{save_path}{os_separator}patch{os_separator}{file}"
                                 log(f"Перемещаем файл из {from_file} в {to_file}",5)
                                 move_file(from_file, to_file, mode='copy')
                                         
@@ -194,7 +216,11 @@ def download_av_base_version (version, connect_dict):
                             log(f"Добавляем содержимое файла {src_file} в конец файла {dst_file}",5)
                             append_file_to_another(src_file, dst_file)                            
                             
-                            
+                    # В режиме  mode_one_dir_base правим пути в директиве file в update.ver
+                    if connect_dict['mode_one_dir_base'] == 1:
+                        log (f"[{version}] Модифицируем update.ver для режима mode_one_dir_base",3)
+                        modify_update_ver(tmp_updatever_filepath)
+                        
                     # копируем update.ver в хранилище
                     updatever_storage_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll'])}"
                     log (f"[{version}] Перемещаем update.ver в хранилище : {updatever_storage_path}",1)

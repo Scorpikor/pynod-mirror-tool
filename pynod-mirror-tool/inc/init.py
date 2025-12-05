@@ -71,6 +71,14 @@ def init(ver):
         'dll' : 'eset_upd/v18/dll/update.ver',
         'name' : 'ESET NOD32 Ver. 17 - 18'
         }
+        
+    if ver == 'v19':
+        return {
+        'fix': '/dll',
+        'upd' : 'eset_upd/consumer/windows/full/dll/update.ver',
+        'dll' : 'eset_upd/v19/dll/update.ver',
+        'name' : 'ESET NOD32 Ver. 19'
+        }
 
     if ver == 'ep6':
         return {

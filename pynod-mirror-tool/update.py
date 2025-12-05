@@ -31,6 +31,7 @@ if __name__ == "__main__":
     official_servers_update = int(config.get('CONNECTION','official_servers_update'))
     mirror_connect_retries = int(config.get('CONNECTION','mirror_connect_retries'))     # Kол-во попыток скачать файл
     max_workers = int(config.get('CONNECTION','max_workers'))                   # Кол-во потоков загрузки баз
+    mode_one_dir_base = int(config.get('ESET','mode_one_dir_base', fallback=0))             # Режим хранения баз антивируса "mode_one_dir_base"
     protoscan_v3_patch = int(config.get('PATCH','protoscan_v3_patch'))          # Триггер применения патча protoscan_v3_patch
     web_page_data = []                                                          # Для формирования WEB страницы отчета
     
@@ -50,6 +51,7 @@ if __name__ == "__main__":
         sys.exit(1)
                                        
     prefix_config = os_separator + config.get('ESET','prefix')                  # Имя папки, в которую складывать базы разных версий в корне веб сервера
+    #log(f"Префикс для папки {prefix_config}",3)                                 # --------------------------------------------------------------
     server_user = str(config.get('CONNECTION','mirror_user'))
     server_password = str(config.get('CONNECTION','mirror_password'))
     server_timeout = int(config.get('CONNECTION','mirror_timeout'))
@@ -94,8 +96,9 @@ if __name__ == "__main__":
         'web_server_root': web_server_root,
         'prefix_config': prefix_config,
         'protoscan_v3_patch': protoscan_v3_patch,
+        'mode_one_dir_base' : mode_one_dir_base,                                 # режим хранения файлов баз mode_one_dir_base
         }
-        
+        #log(f"Префикс для папки {connect_dict}",3)                              # ------------------------------------------------------------------
         result_dict = download_av_base_version (version, connect_dict)
         # =================
         # Формируем отчеты

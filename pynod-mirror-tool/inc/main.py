@@ -49,11 +49,11 @@ def download_av_base_version (version, connect_dict):
                 # Включен режим сохранения баз в одну папку
                 # updatever_storage_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll'])}"
                 log (f"[{version}] Режим сохранения баз в одном каталоге",3)
-                save_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll']).rsplit('/', 1)[0]}"
+                save_path = f"{connect_dict['web_server_root']}{os_separator}{init_filepath_fix(os_separator,init_environment['dll']).rsplit(os_separator, 1)[0]}"
             else:
                 # Норамальный режим сохранения баз
                 save_path = f"{connect_dict['web_server_root']}{prefix_config}{os_separator}{version}"    # Путь, по которому будем сохранять файлы базы без части из update.ver
-            log(f"---- SAVE PATH main [{save_path}]",1 )                          # ----------------------------------------------------------------
+            log(f"---- SAVE PATH main [{save_path}]",5 )                          # ----------------------------------------------------------------
             # ===================================
             # Этап 1. Скачиваем update.ver в tmp
             # ===================================

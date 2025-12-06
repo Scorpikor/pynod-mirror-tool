@@ -1,5 +1,5 @@
 # pynod-mirror-tool - Dockerized
- ![Version](https://img.shields.io/badge/version-20250509-gold)
+ ![Version](https://img.shields.io/badge/version-20251205-gold)
  [![Python](https://img.shields.io/pypi/pyversions/tensorflow.svg)](https://badge.fury.io/py/tensorflow)
  ![Last commit](https://img.shields.io/github/last-commit/Scorpikor/pynod-mirror-tool/main?cacheSeconds=0)
 [![Opened issues](https://img.shields.io/github/issues/Scorpikor/pynod-mirror-tool?color=darkred)](https://github.com/rzc0d3r/ESET-KeyGen/issues?cacheSeconds=0)

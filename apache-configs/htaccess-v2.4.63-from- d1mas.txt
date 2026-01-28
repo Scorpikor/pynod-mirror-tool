@@ -1,0 +1,73 @@
+<IfModule mod_rewrite.c>
+  # Базовые настройки безопасности
+  Options -Indexes -MultiViews +FollowSymLinks
+  Header always set X-Robots-Tag "noindex, nofollow"
+  Header always set Cache-Control "no-store, no-cache, must-revalidate"
+
+  #AllowOverride All
+  Require all granted
+
+  RewriteEngine on
+
+  # Блокировка доступа к служебным файлам
+  <FilesMatch "\.(env|htaccess|bak|sql|log)$">
+    Require all denied
+  </FilesMatch>
+
+  # Определение версии продукта по User-Agent
+  RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (\d*) [NC]
+  RewriteRule .* - [env=VER:v%1]
+
+  RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA|EFSW)\ Update.*BPC\ (\d*) [NC]
+  RewriteRule .* - [env=VER:ep%2]
+
+  # Обработка, если User-Agent не антивирус
+  RewriteCond %{ENV:VER} ^$ [NC]
+  RewriteCond %{REQUEST_URI} stat
+  RewriteRule .* stat.html [L]
+
+  RewriteCond %{ENV:VER} ^$ [NC]
+  RewriteRule ^(.*)$ - [F,L]
+
+  # Обработка update.ver
+  RewriteCond %{ENV:VER} ^ep([6-9]|1[0-9])$ [NC]
+  RewriteRule ^(dll/)?update.ver$ /eset_upd/%{env:VER}/dll/update.ver [L]
+
+  RewriteCond %{ENV:VER} ^v[3-8]$ [NC]
+  RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v3/dll/update.ver [env=STEP:updatev3-8,L]
+
+  RewriteCond %{ENV:VER} ^v1[0-1]$ [NC]
+  RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v10/dll/update.ver [env=STEP:updatev10-11,L]
+
+  RewriteCond %{ENV:VER} ^v1[2-9]$ [NC]
+  RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/%{ENV:VER}/dll/update.ver [env=STEP:updatev12-19,L]
+
+
+  # Обработка файлов обновлений
+
+  RewriteCond %{ENV:VER} ^.+$ [NC]
+  RewriteRule ^ - [E=VER_PATH:%{ENV:VER},E=STEP:others-ep]
+
+  RewriteCond %{ENV:VER} ^v[3-8]$ [NC]
+  RewriteRule ^ - [E=VER_PATH:v3,E=STEP:others3-8]
+
+  RewriteCond %{ENV:VER} ^v1[0-1]$ [NC]
+  RewriteRule ^ - [E=VER_PATH:v10,E=STEP:others10-11]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ /data/%{ENV:VER_PATH}/$1 [E=STEP:done,L]
+
+  # Запрет прямого доступа к служебным папкам
+  #RewriteRule ^(eset_upd|data)/ - [F,L]
+
+  Header always set X-Custom-Ver "%{VER}e" env=VER
+  Header always set X-Custom-Step "%{STEP}e" env=STEP
+  Header always set X-Custom-Path "%{VER_PATH}e" env=VER_PATH
+
+</IfModule>
+
+# Отключаем MIME-спуфинг
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

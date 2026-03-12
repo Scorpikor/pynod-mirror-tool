@@ -123,8 +123,8 @@ def user_agent (ver):
 
     if ver == 'ep9':
         bzz =(
-        'EEA Update (Windows; U; 64bit; BPC 9.1.2060.0; OS: 10.0.26100 SP 0.0 NT; HWF: 01001E59-7926-48F0-8556-5209DC5E3C06; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 3AC-9SP-9D9; SEAT 154b3474; RET 2103)',
-        'EEA Update (Windows; U; 64bit; BPC 9.1.2060.0; OS: 10.0.26100 SP 0.0 NT; HWF: 01001E58-7916-38F1-8218-2208DC5E3C12; PLOC ru_ru; PCODE 107.0.0; PAR -1; ATH -1; DC 0; PLID 2AC-2SP-9D9; SEAT 144b2454; RET 2103)',
+        'EFSW Update (Windows; U; 64bit; BPC 9.0.12017.0; OS: 6.1.7601 SP 1.0 NT; TDB 67467; CL 0.0.0; x64s; APP efsw; PX 0; PUA 0; CD 1; RA 0; UNS 0; HVCI 0; SHA256 1; WU 2; ACS 0; TDT 0; LTS 0; NPU 0; HWF: 010040B9-CE44-B57C-837B-41F0927553D3; PLOC ru_ru; PCODE 211.0.0; PAR -1; ATH -1; DC 0; PLID ; SEAT 154b3474; RET 5003)',
+        'EFSW Update (Windows; U; 64bit; BPC 9.0.12017.0; OS: 6.1.7601 SP 1.0 NT; TDB 67467; CL 0.0.0; x64s; APP efsw; PX 0; PUA 0; CD 1; RA 0; UNS 0; HVCI 0; SHA256 1; WU 2; ACS 0; TDT 0; LTS 0; NPU 0; HWF: 010040A4-BA21-A35B-615C-54E1455521E3; PLOC ru_ru; PCODE 211.0.0; PAR -1; ATH -1; DC 0; PLID ; SEAT 241b2174; RET 5003)',
         )
         return random.choice(bzz)
         
@@ -157,4 +157,5 @@ def user_agent (ver):
     
     else:
         print ("Неопределенная версия", ver, "в user_agent.py")
+
         sys.exit(1)

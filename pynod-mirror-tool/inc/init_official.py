@@ -96,14 +96,6 @@ def init(ver):
         'dll' : 'eset_upd/v18/dll/update.ver',
         'name' : 'ESET NOD32 Ver. 17 - 18'
         }
-        
-    if ver == 'v19':
-        return {
-        'fix': '/dll',
-        'upd' : 'auto/consumer/windows/dll/update.ver',
-        'dll' : 'eset_upd/v19/dll/update.ver',
-        'name' : 'ESET NOD32 Ver. 19'
-        }
 
     if ver == 'ep5':
         return {
@@ -160,7 +152,14 @@ def init(ver):
         'dll' : 'eset_upd/ep12/dll/update.ver',         # Путь, по которому будет лежать update.ver у нас на зеркале
         'name' : 'ESET NOD32 Endpoint Ver. 12'          # Описание
         }
-
+    if ver == 'ep13':
+        return {
+        'fix': '/dll',                                  # Добавочный путь
+        'upd' : 'eset_upd/ep13/dll/update.ver',         # Путь, по которому сам ep13 запрашивает update.ver с сервера обновлений для оф.сервера
+        'dll' : 'eset_upd/ep13/dll/update.ver',         # Путь, по которому будет лежать update.ver у нас на зеркале
+        'name' : 'ESET NOD32 Endpoint Ver. 13'          # Описание
+        }
+    
     else:
         print ("Неопределенная версия", ver, "в init.py")
         sys.exit(1)

@@ -71,14 +71,6 @@ def init(ver):
         'dll' : 'eset_upd/v18/dll/update.ver',
         'name' : 'ESET NOD32 Ver. 17 - 18'
         }
-        
-    if ver == 'v19':
-        return {
-        'fix': '/dll',
-        'upd' : 'eset_upd/consumer/windows/full/dll/update.ver',
-        'dll' : 'eset_upd/v19/dll/update.ver',
-        'name' : 'ESET NOD32 Ver. 19'
-        }
 
     if ver == 'ep6':
         return {
@@ -126,6 +118,14 @@ def init(ver):
         'upd' : 'dll/update.ver',                      # Путь, по которому сам ep12 запрашивает update.ver с сервера обновлений
         'dll' : 'eset_upd/ep12/dll/update.ver',        # Путь, по которому будет лежать update.ver у нас на зеркале
         'name' : 'ESET NOD32 Endpoint Ver. 12'         # Описание
+        }
+
+    if ver == 'ep13':
+        return {
+        'fix': '/dll',                                 # Добавочный путь
+        'upd' : 'dll/update.ver',                      # Путь, по которому сам ep13 запрашивает update.ver с сервера обновлений
+        'dll' : 'eset_upd/ep13/dll/update.ver',        # Путь, по которому будет лежать update.ver у нас на зеркале
+        'name' : 'ESET NOD32 Endpoint Ver. 13'         # Описание
         }
 
     else:

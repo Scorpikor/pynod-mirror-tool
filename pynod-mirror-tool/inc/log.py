@@ -7,6 +7,7 @@ import configparser
 import time
 import os
 import re
+from pathlib import Path
 from inc.class_tools import *
 
 if os.name == "nt":
@@ -67,23 +68,46 @@ def trim_log_file_tail(path, max_bytes=1024*1024):
     with open(path, "wb") as f:
         f.write(data)
 
-def path_is_valid_for_os(path: str) -> bool:
-    # Функция валидации пути для фильтрации неправильных строк в имени файла в конфиге
+def _legacy_path_is_valid(path: str) -> bool:
+    # Валидация пути - запасной вариант для Python < 3.11 где не было метода is_valid() в pathlib.
+    
     if os.name == "posix":  # Linux / macOS
-        # Windows-путь выглядит как C:\ или D:\ , проверяем это
         if re.match(r"^[A-Za-z]:\\", path):
             return False
-        # Обратные слеши для Linux — подозрительны
         if "\\" in path:
             return False
         return True
 
     elif os.name == "nt":  # Windows
+        # 1. Обработка сетевых (UNC) путей (например, "\\server\share\folder")
+        if path.startswith(r"\\"):
+            # отсекаем \\server\share, чтобы проверить только хвост пути
+            # шаблон поиска конструкции "\\имя_сервера\имя_шары"
+            unc_match = re.match(r"^\\\\([^\\]+)\\([^\\]+)", path)
+            if not unc_match:
+                return False  # Путь вида "\\" или "\\server" без шары — невалидный
+            
+            # Берем всё, что идет ПОСЛЕ имени шары
+            path_to_check = path[len(unc_match.group(0)):]
+            
+        # 2. Обработка локальных путей с буквой диска (например, C:\folder)
+        else:
+            path_to_check = re.sub(r"^[A-Za-z]:", "", path)
+        
+        # 3. Финальная проверка оставшейся части пути на запрещенные символы
         invalid_chars = r'<>:"|?*'
-        return not any(ch in path for ch in invalid_chars)
+        return not any(ch in path_to_check for ch in invalid_chars)
 
     return True
 
+def path_is_valid_for_os(path: str) -> bool:
+    # Функция валидации пути для фильтрации неправильных строк в имени файла в конфиге
+    # для старых систем (Python < 3.11) проверка через функцию _legacy_path_is_valid(path)
+    if hasattr(Path, "is_valid"):
+        #return Path(path).is_valid()
+        return _legacy_path_is_valid(path)
+    else:
+        return _legacy_path_is_valid(path)
         
 def close_log():
     if generate_log_file == 1:

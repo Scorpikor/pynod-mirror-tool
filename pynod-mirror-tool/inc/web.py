@@ -109,7 +109,7 @@ def web_page_generator(data, only_table, file_path):
 </html>"""
                             
     
-    file = open(file_path, "w")
+    file = open(file_path, "w", encoding="utf-8")
     file.write(html_content)
     file.close()
     
